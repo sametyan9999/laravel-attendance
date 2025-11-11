@@ -5,7 +5,6 @@
     --muted: #6b7280;
     --border: #1f2937;
     --container: 880px;
-    /* 入力欄の横幅感に寄せる */
 }
 
 * {
@@ -17,12 +16,14 @@ body {
     height: 100%;
 }
 
+/* ===================== */
+/* 本体設定（背景指定は削除） */
+/* ===================== */
 body.gt-body {
     margin: 0;
     color: var(--text);
-    background: #fff;
-    /* 参考画像は白背景 */
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Hiragino Kaku Gothic ProN", "Noto Sans JP", "Yu Gothic", "Helvetica Neue", Arial, "メイリオ", Meiryo, sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Hiragino Kaku Gothic ProN",
+        "Noto Sans JP", "Yu Gothic", "Helvetica Neue", Arial, "メイリオ", Meiryo, sans-serif;
 }
 
 /* ===================== */
@@ -58,12 +59,9 @@ body.gt-body {
     color: #fff;
     text-decoration: none;
     font-size: 20px;
-    /* ← 少し大きく */
     font-weight: 800;
-    /* ← 太字で強調 */
     letter-spacing: 0.05em;
     padding: 6px 10px;
-    /* ← クリック範囲を広げる */
     transition: opacity 0.2s;
 }
 
@@ -76,11 +74,9 @@ body.gt-body {
     border: none;
     color: #fff;
     font-size: 20px;
-    /* ← 同じく大きく */
     font-weight: 800;
     cursor: pointer;
     padding: 6px 10px;
-    /* ← 押しやすく */
     transition: opacity 0.2s;
 }
 
@@ -111,7 +107,6 @@ body.gt-body {
 .gt-label {
     display: block;
     font-weight: 700;
-    /* 太字見出し */
     margin: 28px 0 8px;
 }
 
@@ -120,7 +115,6 @@ body.gt-body {
     height: 44px;
     padding: 8px 12px;
     border: 1.5px solid #000;
-    /* 黒線でカッチリ */
     border-radius: 4px;
     background: #fff;
     font-size: 16px;
@@ -171,7 +165,6 @@ body.gt-body {
 
 .gt-link {
     color: #2563eb;
-    /* 青リンク */
     text-decoration: none;
 }
 
@@ -187,12 +180,10 @@ body.gt-body {
     font-size: 32px;
     font-weight: 700;
     margin: 72px 0 40px;
-    /* タイトルの上下余白を少し広く */
 }
 
 .gt-form {
     width: min(720px, calc(100% - 48px));
-    /* 参考画像に合わせてやや狭く */
     margin: 0 auto 96px;
 }
 
@@ -200,37 +191,72 @@ body.gt-body {
     display: block;
     font-weight: 700;
     margin: 28px 0 10px;
-    /* ラベルの間隔を参考画像に寄せる */
 }
 
 .gt-input {
     height: 44px;
     border: 1.5px solid #000;
-    /* 黒枠でカッチリ */
     border-radius: 4px;
 }
 
 .gt-btn {
     height: 48px;
     margin: 38px 0 14px;
-    /* ボタン上の余白を少し広めに */
     font-weight: 800;
     font-size: 18px;
 }
 
-/* 背景の基準 */
+/* ===================== */
+/* 背景制御（ログイン状態で切り替え） */
+/* ===================== */
 .gt-body {
     min-height: 100vh;
 }
 
 /* ログイン前（ゲスト）= 白 */
-.gt-body--guest {
+body.gt-body.gt-body--guest {
     background: #fff;
 }
 
-/* ログイン後（認証済み）= うっすらグレー */
-.gt-body--authed {
-    background: #f3f4f6;
+/* ログイン後（認証済み）= ややベージュがかったグレー */
+body.gt-body.gt-body--authed {
+    background: #f1efe9;
 }
 
-/* 参考画像のトーン */
+/* ===================== */
+/* 休憩入・休憩戻（勤怠ページのみ適用） */
+/* ===================== */
+
+/* 休憩入（勤務中の白ボタン） */
+.attd-actions .btn-sub {
+    background: #fff !important;
+    color: #111 !important;
+    border: none !important;
+    /* 枠線なし */
+    font-size: 30px !important;
+    /* 退勤と同じ文字サイズ */
+    font-weight: 800;
+    letter-spacing: .08em;
+    box-shadow: 0 2px 0 rgba(0, 0, 0, .12);
+}
+
+.attd-actions .btn-sub:hover {
+    background: #f9fafb !important;
+}
+
+/* 休憩戻（休憩中の白ボタン） */
+.attd-actions.break-mode .btn-main {
+    background: #fff !important;
+    color: #111 !important;
+    border: none !important;
+    /* 枠線なし */
+    font-size: 30px !important;
+    /* 退勤と同じ文字サイズ */
+    font-weight: 800;
+    letter-spacing: .08em;
+    box-shadow: 0 2px 0 rgba(0, 0, 0, .12);
+}
+
+.attd-actions.break-mode .btn-main:hover {
+    background: #f9fafb !important;
+}
