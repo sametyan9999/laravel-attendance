@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Front;
 use App\Http\Controllers\Controller;
 use App\Models\Attendance;
 use App\Models\AttendanceBreak;
+use Carbon\Carbon;
 use Carbon\CarbonImmutable;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -115,62 +116,86 @@ class AttendanceRecordController extends Controller
 
     /**
      * PG04: 月次一覧（?month=YYYY-MM）
-     * 参考画像に合わせた行データを構築
+     * Blade が扱いやすいように、Carbon と配列で渡す
      */
     public function indexMonthly(Request $request)
     {
         $user = Auth::user();
 
-        $base = $request->filled('month')
-            ? CarbonImmutable::parse($request->string('month')->toString() . '-01')
-            : CarbonImmutable::now();
+        // 互換性のある取得方法（string() は使わない）
+        $monthStr = (string) $request->query('month', '');
 
-        $month = $base->format('Y-m');
+        // YYYY-MM のみ許容して CarbonImmutable に正規化
+        if (preg_match('/^\d{4}-\d{2}$/', $monthStr)) {
+            $base = CarbonImmutable::parse($monthStr . '-01')->startOfMonth();
+        } else {
+            $base = CarbonImmutable::now()->startOfMonth();
+        }
+
         $start = $base->startOfMonth();
         $end   = $base->endOfMonth();
 
-        // 今月分の勤怠をロード（休憩も同時）
+        // 当月の勤怠（休憩含む）を取得
+        // 🚩 ここが重要：キーを "Y-m-d" に固定して keyBy する
         $attendances = Attendance::with('breaks')
             ->where('user_id', $user->id)
             ->whereBetween('work_date', [$start->toDateString(), $end->toDateString()])
             ->get()
-            ->keyBy('work_date');
+            ->keyBy(function ($r) {
+                // work_date が Carbon でも文字列でも確実に "Y-m-d" に揃える
+                return Carbon::parse($r->work_date)->format('Y-m-d');
+            });
 
-        // 日付ごとの行配列を作成
+        // Blade 側のテーブルロジックに合わせた配列を用意
+        // - $days: Carbon の配列（各日）
+        // - $records: 'Y-m-d' => ['id', 'clock_in', 'clock_out', 'break_minutes', 'total_minutes', 'break_hm', 'work_hm']
         $days = [];
+        $records = [];
+
         for ($d = $start; $d <= $end; $d = $d->addDay()) {
+            $days[] = $d;
+            /** @var Attendance|null $att */
             $att = $attendances->get($d->toDateString());
 
-            // 休憩合計（分）
             if ($att) {
+                // 休憩合計（分）
                 $breakMin = 0;
                 foreach ($att->breaks as $b) {
                     if ($b->break_in_at && $b->break_out_at) {
-                        $breakMin += $b->break_out_at->diffInMinutes($b->break_in_at);
+                        $breakMin += Carbon::parse($b->break_out_at)->diffInMinutes(Carbon::parse($b->break_in_at));
                     }
                 }
-                $att->break_hm = $breakMin > 0 ? $this->minToHM($breakMin) : '—';
 
-                // 勤務合計 = 退勤-出勤-休憩
+                // 勤務合計（分）= 退勤 - 出勤 - 休憩
+                $totalMin = null;
                 if ($att->clock_in_at && $att->clock_out_at) {
-                    $workMin = $att->clock_out_at->diffInMinutes($att->clock_in_at) - $breakMin;
-                    $att->work_hm = $workMin >= 0 ? $this->minToHM($workMin) : '—';
-                } else {
-                    $att->work_hm = '—';
+                    $totalMin = Carbon::parse($att->clock_out_at)->diffInMinutes(Carbon::parse($att->clock_in_at)) - $breakMin;
+                    if ($totalMin < 0) $totalMin = 0;
                 }
-            }
 
-            $days[] = [
-                'date' => $d,
-                'attendance' => $att,
-            ];
+                // 表示用の H:MM も保持（Blade で使う/デバッグしやすい）
+                $breakHm = $breakMin ? $this->minToHM($breakMin) : '—';
+                $workHm  = is_int($totalMin) ? $this->minToHM($totalMin) : '—';
+
+                $records[$d->toDateString()] = [
+                    'id'             => $att->id,
+                    'clock_in'       => $att->clock_in_at,   // Carbon(キャスト済) or string
+                    'clock_out'      => $att->clock_out_at,  // Carbon(キャスト済) or string
+                    'break_minutes'  => $breakMin ?: null,
+                    'total_minutes'  => $totalMin,
+                    'break_hm'       => $breakHm,
+                    'work_hm'        => $workHm,
+                ];
+            }
         }
 
+        // Blade に Carbon / 配列を渡す
         return view('attendance.list', [
-            'days'      => $days,
-            'month'     => $month,
-            'prevMonth' => $base->subMonth()->format('Y-m'),
-            'nextMonth' => $base->addMonth()->format('Y-m'),
+            'month'     => $base,                 // CarbonImmutable
+            'prevMonth' => $base->subMonth(),     // CarbonImmutable
+            'nextMonth' => $base->addMonth(),     // CarbonImmutable
+            'days'      => $days,                 // CarbonImmutable[]（1日ごと）
+            'records'   => $records,              // 'Y-m-d' => [...]
         ]);
     }
 

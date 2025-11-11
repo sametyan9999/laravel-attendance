@@ -59,7 +59,7 @@
           </form>
 
         @elseif ($attendance->status === 'completed')
-          <p class="attd-done">本日の勤務は終了しました</p>
+          <p class="attd-done">お疲れ様でした。</p>
         @endif
       </div>
 

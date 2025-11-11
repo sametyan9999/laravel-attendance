@@ -1,110 +1,185 @@
-/* ページ全体レイアウト */
-.al-wrapper {
-    width: min(960px, calc(100% - 48px));
-    margin: 32px auto 96px;
+/* 背景・全体 */
+.attdlist-wrap {
+    padding: 32px 16px 64px;
 }
 
-.al-title {
-    font-size: 22px;
-    font-weight: 700;
-    margin: 12px 0 20px;
-    padding-left: 16px;
-    border-left: 4px solid #111;
+.attdlist-inner {
+    width: min(960px, 94vw);
+    margin: 0 auto;
+    color: #111;
+    font-family: "Noto Sans JP", system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+/* タイトル */
+.attdlist-title {
+    font-size: 26px;
+    font-weight: 900;
+    letter-spacing: .03em;
+    margin: 8px 0 20px;
+    position: relative;
+    padding-left: 14px;
+}
+
+.attdlist-title::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 3px;
+    bottom: 3px;
+    width: 5px;
+    border-radius: 2px;
+    background: #111;
 }
 
 /* 月切替バー */
-.al-monthbar {
+.attdlist-toolbar {
     display: grid;
-    grid-template-columns: 1fr auto 1fr;
-    align-items: center;
+    grid-template-columns: 120px 1fr 120px;
     gap: 12px;
-    background: #f3f4f6;
-    padding: 10px 16px;
-    border-radius: 10px;
-    margin-bottom: 18px;
+    align-items: center;
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 12px 18px;
+    margin-bottom: 24px;
 }
 
-.al-monthbtn {
-    justify-self: start;
-    display: inline-block;
-    padding: 6px 12px;
-    border-radius: 16px;
+.tool-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    height: 40px;
+    border-radius: 20px;
     background: #fff;
-    border: 1px solid #ddd;
     color: #111;
     text-decoration: none;
-    font-weight: 600;
+    font-weight: 700;
+    padding: 0 18px;
+    border: 1px solid #e5e7eb;
+    transition: all 0.2s ease;
+    font-size: 15px;
 }
 
-.al-monthbtn:last-child {
-    justify-self: end;
+.tool-btn:hover {
+    background: #f3f4f6;
 }
 
-.al-monthnow {
-    display: flex;
+.tool-current {
+    justify-self: center;
+    display: inline-flex;
     align-items: center;
     gap: 8px;
-    font-weight: 700;
+    font-weight: 800;
+    font-size: 20px;
 }
 
-.al-monthnow__icon {
-    font-size: 18px;
+.icon-calendar {
+    font-size: 20px;
+    opacity: .7;
 }
 
-/* テーブル */
-.al-tablewrap {
+/* テーブル全体 */
+.attdlist-card {
     background: #fff;
-    border-radius: 12px;
-    overflow: hidden;
     border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    overflow: hidden;
 }
 
-.al-table {
+.attdlist-table {
     width: 100%;
     border-collapse: separate;
     border-spacing: 0;
+    font-size: 15px;
+    table-layout: fixed;
 }
 
-.al-table thead th {
+.attdlist-table thead th {
+    text-align: center;
     background: #f9fafb;
-    text-align: left;
-    padding: 12px 16px;
-    font-weight: 700;
+    color: #111;
+    font-weight: 800;
+    padding: 14px 16px;
     border-bottom: 1px solid #e5e7eb;
-    font-size: 14px;
 }
 
-.al-table tbody td {
-    padding: 12px 16px;
+.attdlist-table tbody td,
+.attdlist-table tbody th {
+    text-align: center;
+    padding: 14px 16px;
     border-bottom: 1px solid #f1f5f9;
-    font-size: 14px;
+    font-weight: 600;
+    height: 56px;
 }
 
-.al-col-date {
+.attdlist-table tbody tr:nth-child(even) td,
+.attdlist-table tbody tr:nth-child(even) th {
+    background: #fcfcfd;
+}
+
+/* 列の均等幅 */
+.col-date {
+    width: 28%;
     white-space: nowrap;
 }
 
-.al-dow {
-    color: #6b7280;
-    font-size: 12px;
-    margin-left: 4px;
+.col-time {
+    width: 15%;
 }
 
-.al-col-detail {
-    text-align: right;
+.col-break {
+    width: 14%;
 }
 
-.al-detail {
+.col-total {
+    width: 14%;
+}
+
+.col-detail {
+    width: 14%;
+}
+
+/* 詳細リンク */
+.col-detail .link-detail {
     color: #111;
+    font-weight: 800;
     text-decoration: none;
-    font-weight: 700;
+    letter-spacing: .03em;
 }
 
-.al-detail:hover {
+.col-detail .link-detail:hover {
     text-decoration: underline;
 }
 
-.al-detail.is-disabled {
-    color: #9ca3af;
-    pointer-events: none;
+/* 空行 */
+.empty {
+    text-align: center;
+    padding: 32px 0 !important;
+    color: #6b7280;
+    font-weight: 600;
+    font-size: 15px;
+}
+
+/* スマホ */
+@media (max-width: 520px) {
+    .attdlist-toolbar {
+        grid-template-columns: 1fr;
+    }
+
+    .tool-btn {
+        width: 100%;
+    }
+
+    .tool-current {
+        justify-self: start;
+    }
+
+    .attdlist-table {
+        font-size: 13px;
+    }
+
+    .attdlist-title {
+        font-size: 22px;
+    }
 }
