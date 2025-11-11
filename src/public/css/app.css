@@ -1,0 +1,236 @@
+/* ベース */
+:root {
+    --black: #000;
+    --text: #111;
+    --muted: #6b7280;
+    --border: #1f2937;
+    --container: 880px;
+    /* 入力欄の横幅感に寄せる */
+}
+
+* {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    height: 100%;
+}
+
+body.gt-body {
+    margin: 0;
+    color: var(--text);
+    background: #fff;
+    /* 参考画像は白背景 */
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Hiragino Kaku Gothic ProN", "Noto Sans JP", "Yu Gothic", "Helvetica Neue", Arial, "メイリオ", Meiryo, sans-serif;
+}
+
+/* ===================== */
+/* ヘッダー（黒帯＋ロゴ＋右ナビ） */
+/* ===================== */
+.gt-header {
+    background: #000;
+    padding: 12px 0;
+}
+
+.gt-header__inner {
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 48px;
+}
+
+.gt-header__logo img,
+.gt-logo {
+    display: block;
+    height: 32px;
+}
+
+/* ▼▼ 勤怠メニュー部分を大きく修正 ▼▼ */
+.gt-header__nav {
+    display: flex;
+    align-items: center;
+    gap: 36px;
+}
+
+.gt-header__nav a {
+    color: #fff;
+    text-decoration: none;
+    font-size: 20px;
+    /* ← 少し大きく */
+    font-weight: 800;
+    /* ← 太字で強調 */
+    letter-spacing: 0.05em;
+    padding: 6px 10px;
+    /* ← クリック範囲を広げる */
+    transition: opacity 0.2s;
+}
+
+.gt-header__nav a:hover {
+    opacity: 0.85;
+}
+
+.gt-header__logout button {
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 20px;
+    /* ← 同じく大きく */
+    font-weight: 800;
+    cursor: pointer;
+    padding: 6px 10px;
+    /* ← 押しやすく */
+    transition: opacity 0.2s;
+}
+
+.gt-header__logout button:hover {
+    opacity: 0.85;
+}
+
+/* ▲▲ 修正ここまで ▲▲ */
+
+/* ===================== */
+/* タイトル */
+/* ===================== */
+.gt-title {
+    text-align: center;
+    font-size: 32px;
+    font-weight: 700;
+    margin: 56px 0 32px;
+}
+
+/* ===================== */
+/* フォーム */
+/* ===================== */
+.gt-form {
+    width: min(var(--container), calc(100% - 48px));
+    margin: 0 auto 80px;
+}
+
+.gt-label {
+    display: block;
+    font-weight: 700;
+    /* 太字見出し */
+    margin: 28px 0 8px;
+}
+
+.gt-input {
+    width: 100%;
+    height: 44px;
+    padding: 8px 12px;
+    border: 1.5px solid #000;
+    /* 黒線でカッチリ */
+    border-radius: 4px;
+    background: #fff;
+    font-size: 16px;
+}
+
+.gt-input:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(0, 0, 0, .08);
+}
+
+/* ===================== */
+/* エラー（必要なら） */
+/* ===================== */
+.gt-error {
+    color: #d32f2f;
+    font-size: 13px;
+    margin-top: 6px;
+}
+
+/* ===================== */
+/* ボタン（幅広・黒・白文字・中央） */
+/* ===================== */
+.gt-btn {
+    display: block;
+    width: 100%;
+    height: 48px;
+    margin: 32px 0 14px;
+    background: #000;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    font-weight: 800;
+    font-size: 18px;
+    cursor: pointer;
+}
+
+.gt-btn:hover {
+    opacity: .92;
+}
+
+/* ===================== */
+/* 下部リンク */
+/* ===================== */
+.gt-link-row {
+    text-align: center;
+    margin: 0;
+}
+
+.gt-link {
+    color: #2563eb;
+    /* 青リンク */
+    text-decoration: none;
+}
+
+.gt-link:hover {
+    text-decoration: underline;
+}
+
+/* ===================== */
+/* ログイン/登録画面の微調整 */
+/* ===================== */
+.gt-title {
+    text-align: center;
+    font-size: 32px;
+    font-weight: 700;
+    margin: 72px 0 40px;
+    /* タイトルの上下余白を少し広く */
+}
+
+.gt-form {
+    width: min(720px, calc(100% - 48px));
+    /* 参考画像に合わせてやや狭く */
+    margin: 0 auto 96px;
+}
+
+.gt-label {
+    display: block;
+    font-weight: 700;
+    margin: 28px 0 10px;
+    /* ラベルの間隔を参考画像に寄せる */
+}
+
+.gt-input {
+    height: 44px;
+    border: 1.5px solid #000;
+    /* 黒枠でカッチリ */
+    border-radius: 4px;
+}
+
+.gt-btn {
+    height: 48px;
+    margin: 38px 0 14px;
+    /* ボタン上の余白を少し広めに */
+    font-weight: 800;
+    font-size: 18px;
+}
+
+/* 背景の基準 */
+.gt-body {
+    min-height: 100vh;
+}
+
+/* ログイン前（ゲスト）= 白 */
+.gt-body--guest {
+    background: #fff;
+}
+
+/* ログイン後（認証済み）= うっすらグレー */
+.gt-body--authed {
+    background: #f3f4f6;
+}
+
+/* 参考画像のトーン */

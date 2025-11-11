@@ -1,0 +1,223 @@
+/* 背景制御：ログイン前は白、ログイン後は薄いグレー */
+.gt-body--guest {
+    background: #fff;
+}
+
+.gt-body--authed {
+    background: #f3f4f6;
+}
+
+/* ヘッダーを除いた領域で縦横中央配置 */
+.attd-wrap {
+    min-height: calc(100vh - 56px);
+    /* 56px≈ヘッダー高さ。必要なら調整 */
+    display: grid;
+    place-items: center;
+    padding: 24px 16px 64px;
+}
+
+/* 中身を1カラムで中央に。幅は控えめに */
+.attd-inner {
+    width: 100%;
+    max-width: 720px;
+    text-align: center;
+    display: grid;
+    row-gap: 20px;
+    justify-items: center;
+    color: #111;
+    font-family: "Noto Sans JP", system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", sans-serif;
+}
+
+/* --- ステータスピル --- */
+.attd-status {
+    margin-top: 6px;
+}
+
+.pill {
+    display: inline-block;
+    padding: 6px 16px;
+    font-size: 20px;
+    border-radius: 999px;
+    line-height: 1;
+    background: #e5e7eb;
+    color: #111827;
+    box-shadow: 0 1px 0 rgba(0, 0, 0, .05);
+    /* ほのかな影で立体感 */
+}
+
+.pill-working {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.pill-break {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.pill-completed {
+    background: #e5e7eb;
+    color: #111;
+}
+
+.pill-off_duty {
+    background: #e5e7eb;
+    color: #111;
+}
+
+/* --- 日付 --- */
+.attd-date {
+    margin-top: 2px;
+    font-size: clamp(22px, 2.3vw, 30px);
+    font-weight: 700;
+    letter-spacing: .02em;
+}
+
+/* --- 現在時刻 --- */
+.attd-clock {
+    font-size: clamp(56px, 8vw, 92px);
+    font-weight: 800;
+    letter-spacing: .02em;
+    margin-top: 4px;
+    margin-bottom: 60px;
+}
+
+/* --- アクションボタン --- */
+.attd-actions {
+    display: grid;
+    gap: 16px;
+    justify-items: center;
+    margin-top: 0;
+}
+
+.btn {
+    display: inline-block;
+    min-width: 260px;
+    height: 60px;
+    padding: 0 22px;
+    border: 0;
+    border-radius: 14px;
+    font-size: 18px;
+    font-weight: 800;
+    letter-spacing: .08em;
+    cursor: pointer;
+    transition: transform .02s ease, opacity .15s ease, box-shadow .15s ease;
+    box-shadow: 0 2px 0 rgba(0, 0, 0, .12);
+}
+
+.btn:active {
+    transform: translateY(1px);
+}
+
+.btn:disabled {
+    opacity: .6;
+    cursor: not-allowed;
+}
+
+.btn-main {
+    background: #000;
+    color: #fff;
+    font-size: 30px;
+    font-weight: 800;
+    letter-spacing: .08em;
+}
+
+.btn-main:hover {
+    opacity: .92;
+}
+
+.btn-sub {
+    background: #374151;
+    color: #fff;
+}
+
+.btn-sub:hover {
+    opacity: .92;
+}
+
+/* 完了文言・エラー */
+.attd-done {
+    font-size: 16px;
+    margin-top: 4px;
+}
+
+.attd-errors {
+    margin-top: 10px;
+    width: min(560px, 92vw);
+    background: #fee2e2;
+    color: #991b1b;
+    border: 1px solid #fecaca;
+    border-radius: 12px;
+    padding: 12px 16px;
+    text-align: left;
+}
+
+.attd-errors ul {
+    margin: 0;
+    padding-left: 18px;
+}
+
+/* ユーティリティ */
+.mb-12 {
+    margin-bottom: 12px;
+}
+
+/* スマホ最適化 */
+@media (max-width: 520px) {
+    .attd-inner {
+        row-gap: 18px;
+    }
+
+    .btn {
+        min-width: 240px;
+        height: 56px;
+        font-size: 17px;
+    }
+}
+
+/* 2ボタン時は横並び（working のときに付与される） */
+.attd-actions--row {
+    grid-template-columns: repeat(2, minmax(260px, 1fr));
+    justify-items: stretch;
+    gap: 24px;
+}
+
+.attd-actions--row form {
+    width: 100%;
+}
+
+.attd-actions--row .btn {
+    width: 100%;
+}
+
+/* スマホは縦積みのまま */
+@media (max-width: 520px) {
+    .attd-actions--row {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+}
+
+/* --- 休憩入・休憩戻ボタンを白に統一 --- */
+
+/* 休憩入ボタン（勤務中） */
+.btn-sub {
+    background: #fff;
+    color: #111;
+    border: 1px solid #d1d5db;
+}
+
+.btn-sub:hover {
+    background: #f9fafb;
+}
+
+/* 休憩戻ボタン（休憩中） */
+.attd-actions.break-mode .btn-main {
+    background: #fff;
+    color: #111;
+    border: 1px solid #d1d5db;
+}
+
+.attd-actions.break-mode .btn-main:hover {
+    background: #f9fafb;
+}
