@@ -15,6 +15,24 @@ Route::redirect('/', '/attendance');
 
 /*
 |--------------------------------------------------------------------------
+| Admin Login（PG07）
+|--------------------------------------------------------------------------
+| コントローラを作らずに、ビューを返すだけのルートにする
+*/
+Route::middleware('guest')->group(function () {
+    Route::get('/admin/login', function () {
+        // すでに管理者でログイン済みなら勤怠一覧へ
+        if (auth()->check() && auth()->user()->role === 'admin') {
+            return redirect()->route('admin.attendance.list');
+        }
+
+        // 管理者ログイン用 Blade テンプレート
+        return view('admin.auth.login');
+    })->name('admin.login');
+});
+
+/*
+|--------------------------------------------------------------------------
 | Front (一般ユーザー)
 |--------------------------------------------------------------------------
 | Fortify が /login /register などの認証系ルートを提供します。
@@ -34,6 +52,11 @@ Route::middleware(['auth'])->group(function () {
         ->whereNumber('attendance')
         ->name('attendance.detail');
 
+    // 勤怠詳細の更新（PG05）
+    Route::put('/attendance/detail/{attendance}', [FAttendance::class, 'update'])
+        ->whereNumber('attendance')
+        ->name('attendance.update');
+
     // 申請（PG06）
     Route::get('/stamp_correction_request/list', [FRequest::class, 'myIndex'])->name('request.my_index');
     Route::post('/stamp_correction_request',      [FRequest::class, 'store'])->name('request.store');
@@ -43,8 +66,7 @@ Route::middleware(['auth'])->group(function () {
 |--------------------------------------------------------------------------
 | Admin (管理者)
 |--------------------------------------------------------------------------
-| ※ {request} は Illuminate\Http\Request と衝突しやすいため
-|    {stamp_request} を使用しています。
+| ※ {request} は Illuminate\Http\Request と衝突しやすいため {stamp_request} を使用
 */
 Route::prefix('admin')
     ->middleware(['auth', 'can:admin'])

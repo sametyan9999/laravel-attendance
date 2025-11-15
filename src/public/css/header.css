@@ -1,0 +1,100 @@
+/* ===================== */
+/* ヘッダー共通スタイル   */
+/* ===================== */
+
+.gt-header {
+    background: #000;
+    padding: 0;
+}
+
+/* ★ 高さを 80px に拡大（以前 64px） */
+.gt-header__inner {
+    height: 80px;
+    padding: 0 48px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+/* ロゴを大きく（32px → 40px） */
+.gt-logo {
+    display: inline-flex;
+    align-items: center;
+    text-decoration: none;
+}
+
+.gt-logo img {
+    display: block;
+    height: 40px;
+    /* ★ ここを大きくした！ */
+}
+
+/* 右側メニュー */
+.gt-nav {
+    display: flex;
+    align-items: center;
+    gap: 40px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.gt-nav__link {
+    color: #fff;
+    text-decoration: none;
+    font-size: 20px;
+    /* 大きめ */
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    padding: 8px 6px;
+    /* 少し縦の余白も増やす */
+    background: none;
+    border: none;
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+
+/* ログアウト */
+.gt-nav__logout {
+    padding: 8px 22px;
+    /* 少し縦方向を広げる */
+    border-radius: 999px;
+    border: none;
+    background: none;
+    color: #fff;
+    font-size: 20px;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+}
+
+.gt-nav__link:hover,
+.gt-nav__logout:hover {
+    opacity: 0.85;
+}
+
+.gt-nav__form {
+    margin: 0;
+}
+
+/* 小さめ画面用の軽い調整 */
+@media (max-width: 768px) {
+    .gt-header__inner {
+        padding: 0 16px;
+        gap: 16px;
+        height: 64px;
+        /* モバイルでは元の高さに */
+    }
+
+    .gt-logo img {
+        height: 30px;
+    }
+
+    .gt-nav {
+        gap: 16px;
+    }
+
+    .gt-nav__link,
+    .gt-nav__logout {
+        font-size: 16px;
+    }
+}

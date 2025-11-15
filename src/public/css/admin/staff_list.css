@@ -1,0 +1,126 @@
+/* ============================ */
+/* 管理者：スタッフ一覧（勤怠一覧と同じUIサイズ） */
+/* ============================ */
+
+:root {
+    --bg-light: #f1f1f3;
+    --card-bg: #ffffff;
+    --border: #e5e7eb;
+    --text: #111827;
+}
+
+/* 全体コンテナ */
+.adm-staff {
+    max-width: 1100px;
+    margin: 80px auto 120px;
+    padding: 0 24px;
+}
+
+/* タイトル（勤怠一覧と同じサイズ・太さ） */
+.adm-staff__title {
+    display: flex;
+    align-items: center;
+    font-weight: 800;
+    font-size: 26px;
+    margin-bottom: 24px;
+    letter-spacing: .04em;
+}
+
+.adm-staff__title::before {
+    content: "";
+    width: 6px;
+    height: 26px;
+    border-radius: 3px;
+    background: #111;
+    margin-right: 12px;
+}
+
+/* カード枠 */
+.adm-staff__card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+    width: 100%;
+}
+
+/* テーブル */
+.adm-staff__table {
+    width: 100%;
+    border-collapse: collapse;
+    color: var(--text);
+    font-size: 16px;
+}
+
+/* ヘッダー */
+.adm-staff__table thead th {
+    background: #fafafa;
+    padding: 16px 20px;
+    font-weight: 700;
+    border-bottom: 1px solid var(--border);
+    text-align: center;
+}
+
+/* 行 */
+.adm-staff__table tbody td {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
+    text-align: center;
+    height: 60px;
+}
+
+/* 最終行は border を消す */
+.adm-staff__table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+/* 列幅 */
+.col-name {
+    width: 28%;
+}
+
+.col-mail {
+    width: 50%;
+}
+
+.col-month {
+    width: 22%;
+}
+
+/* =================================== */
+/* ★ 詳細リンク（枠なし・文字のみ）   */
+/* =================================== */
+.adm-staff__detail-link {
+    font-size: 14px;
+    font-weight: 700;
+    /* 太字 */
+    color: #000;
+    /* 黒 */
+    text-decoration: none;
+    /* 下線なし */
+    border: none;
+    /* 枠なし */
+    padding: 0;
+    /* 余白なし */
+    background: none;
+    border-radius: 0;
+    /* 角丸なし */
+    display: inline;
+    /* テキストのように配置 */
+    cursor: pointer;
+}
+
+.adm-staff__detail-link:hover {
+    opacity: .6;
+}
+
+/* スマホ対応 */
+@media (max-width: 768px) {
+    .adm-staff {
+        padding: 0 12px;
+    }
+
+    .adm-staff__table {
+        min-width: 600px;
+    }
+}

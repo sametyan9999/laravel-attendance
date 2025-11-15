@@ -1,0 +1,172 @@
+/* 管理者：申請詳細／勤怠詳細（PG13） */
+
+:root {
+    --adm-bg: #f1efe9;
+    --adm-card-bg: #ffffff;
+    --adm-border: #e5e7eb;
+    --adm-text: #111827;
+    --adm-muted: #6b7280;
+}
+
+/* コンテナ全体 */
+.adm-attd-dtl {
+    max-width: 960px;
+    margin: 56px auto 96px;
+    padding: 0 24px;
+}
+
+.adm-attd-dtl__inner {
+    width: 100%;
+}
+
+/* タイトル */
+.adm-attd-dtl__title {
+    display: flex;
+    align-items: center;
+    font-weight: 800;
+    font-size: 24px;
+    letter-spacing: .04em;
+    margin: 0 0 24px;
+}
+
+.adm-attd-dtl__title::before {
+    content: "";
+    width: 6px;
+    height: 24px;
+    border-radius: 3px;
+    background: #111;
+    margin-right: 10px;
+}
+
+/* カード本体 */
+.adm-attd-dtl__card {
+    background: var(--adm-card-bg);
+    border-radius: 16px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.04);
+    overflow: hidden;
+}
+
+/* 行レイアウト */
+.adm-attd-dtl__row {
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    align-items: center;
+    min-height: 72px;
+    border-bottom: 1px solid var(--adm-border);
+    padding: 0 40px;
+}
+
+.adm-attd-dtl__row:last-child {
+    border-bottom: none;
+}
+
+/* ラベル列 */
+.adm-attd-dtl__label {
+    font-size: 14px;
+    color: var(--adm-muted);
+}
+
+/* 値列 */
+.adm-attd-dtl__value {
+    font-size: 14px;
+}
+
+.adm-attd-dtl__value--date {
+    display: inline-flex;
+    gap: 32px;
+}
+
+.adm-attd-dtl__date-year,
+.adm-attd-dtl__date-day {
+    font-weight: 600;
+}
+
+/* 時刻レンジ */
+.adm-attd-dtl__value--range {
+    display: inline-flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.adm-attd-dtl__time-input {
+    width: 90px;
+    height: 32px;
+    padding: 4px 10px;
+    border-radius: 6px;
+    border: 1px solid var(--adm-border);
+    font-size: 14px;
+    text-align: center;
+    background: #f9fafb;
+}
+
+.adm-attd-dtl__time-input[readonly] {
+    color: var(--adm-text);
+}
+
+.adm-attd-dtl__tilde {
+    font-size: 14px;
+}
+
+/* 備考 */
+.adm-attd-dtl__row--note {
+    min-height: 96px;
+    align-items: flex-start;
+    padding-top: 18px;
+    padding-bottom: 18px;
+}
+
+.adm-attd-dtl__note-input {
+    width: 100%;
+    height: 40px;
+    padding: 8px 12px;
+    border-radius: 6px;
+    border: 1px solid var(--adm-border);
+    font-size: 14px;
+    background: #f9fafb;
+}
+
+/* ボタンエリア */
+.adm-attd-dtl__actions {
+    margin-top: 24px;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.adm-attd-dtl__submit {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 120px;
+    height: 44px;
+    padding: 0 28px;
+    border-radius: 4px;
+    border: none;
+    background: #111;
+    color: #fff;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    letter-spacing: .1em;
+    transition: opacity .2s;
+}
+
+.adm-attd-dtl__submit:hover {
+    opacity: .9;
+}
+
+/* レスポンシブ */
+@media (max-width: 768px) {
+    .adm-attd-dtl {
+        margin-top: 32px;
+        padding: 0 12px;
+    }
+
+    .adm-attd-dtl__row {
+        grid-template-columns: 120px 1fr;
+        padding: 0 16px;
+    }
+
+    .adm-attd-dtl__value--date {
+        gap: 16px;
+    }
+}

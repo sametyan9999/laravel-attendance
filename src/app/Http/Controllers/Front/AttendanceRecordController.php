@@ -5,20 +5,20 @@ namespace App\Http\Controllers\Front;
 use App\Http\Controllers\Controller;
 use App\Models\Attendance;
 use App\Models\AttendanceBreak;
+use App\Models\StampCorrectionRequest;
 use Carbon\Carbon;
 use Carbon\CarbonImmutable;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 
 class AttendanceRecordController extends Controller
 {
-    /**
-     * PG03: 本日の打刻画面
-     */
+    /** PG03: 本日の打刻画面 */
     public function today(Request $request)
     {
-        $user = Auth::user();
+        $user  = Auth::user();
         $today = CarbonImmutable::now()->timezone(config('app.timezone'))->toDateString();
 
         $attendance = Attendance::firstOrCreate(
@@ -32,9 +32,7 @@ class AttendanceRecordController extends Controller
         ]);
     }
 
-    /**
-     * 出勤
-     */
+    /** 出勤 */
     public function clockIn(Request $request)
     {
         return $this->transition(function (Attendance $attendance, CarbonImmutable $now) {
@@ -47,9 +45,7 @@ class AttendanceRecordController extends Controller
         });
     }
 
-    /**
-     * 休憩入
-     */
+    /** 休憩入 */
     public function breakIn(Request $request)
     {
         return $this->transition(function (Attendance $attendance, CarbonImmutable $now) {
@@ -67,9 +63,7 @@ class AttendanceRecordController extends Controller
         });
     }
 
-    /**
-     * 休憩戻
-     */
+    /** 休憩戻 */
     public function breakOut(Request $request)
     {
         return $this->transition(function (Attendance $attendance, CarbonImmutable $now) {
@@ -90,9 +84,7 @@ class AttendanceRecordController extends Controller
         });
     }
 
-    /**
-     * 退勤（休憩中なら直前休憩を自動クローズ）
-     */
+    /** 退勤 */
     public function clockOut(Request $request)
     {
         return $this->transition(function (Attendance $attendance, CarbonImmutable $now) {
@@ -114,18 +106,12 @@ class AttendanceRecordController extends Controller
         });
     }
 
-    /**
-     * PG04: 月次一覧（?month=YYYY-MM）
-     * Blade が扱いやすいように、Carbon と配列で渡す
-     */
+    /** PG04: 月次一覧 */
     public function indexMonthly(Request $request)
     {
         $user = Auth::user();
 
-        // 互換性のある取得方法（string() は使わない）
         $monthStr = (string) $request->query('month', '');
-
-        // YYYY-MM のみ許容して CarbonImmutable に正規化
         if (preg_match('/^\d{4}-\d{2}$/', $monthStr)) {
             $base = CarbonImmutable::parse($monthStr . '-01')->startOfMonth();
         } else {
@@ -135,20 +121,12 @@ class AttendanceRecordController extends Controller
         $start = $base->startOfMonth();
         $end   = $base->endOfMonth();
 
-        // 当月の勤怠（休憩含む）を取得
-        // 🚩 ここが重要：キーを "Y-m-d" に固定して keyBy する
         $attendances = Attendance::with('breaks')
             ->where('user_id', $user->id)
             ->whereBetween('work_date', [$start->toDateString(), $end->toDateString()])
             ->get()
-            ->keyBy(function ($r) {
-                // work_date が Carbon でも文字列でも確実に "Y-m-d" に揃える
-                return Carbon::parse($r->work_date)->format('Y-m-d');
-            });
+            ->keyBy(fn($r) => Carbon::parse($r->work_date)->format('Y-m-d'));
 
-        // Blade 側のテーブルロジックに合わせた配列を用意
-        // - $days: Carbon の配列（各日）
-        // - $records: 'Y-m-d' => ['id', 'clock_in', 'clock_out', 'break_minutes', 'total_minutes', 'break_hm', 'work_hm']
         $days = [];
         $records = [];
 
@@ -158,65 +136,194 @@ class AttendanceRecordController extends Controller
             $att = $attendances->get($d->toDateString());
 
             if ($att) {
-                // 休憩合計（分）
                 $breakMin = 0;
                 foreach ($att->breaks as $b) {
                     if ($b->break_in_at && $b->break_out_at) {
-                        $breakMin += Carbon::parse($b->break_out_at)->diffInMinutes(Carbon::parse($b->break_in_at));
+                        $breakMin += Carbon::parse($b->break_out_at)
+                            ->diffInMinutes(Carbon::parse($b->break_in_at));
                     }
                 }
 
-                // 勤務合計（分）= 退勤 - 出勤 - 休憩
                 $totalMin = null;
                 if ($att->clock_in_at && $att->clock_out_at) {
-                    $totalMin = Carbon::parse($att->clock_out_at)->diffInMinutes(Carbon::parse($att->clock_in_at)) - $breakMin;
+                    $totalMin = Carbon::parse($att->clock_out_at)
+                        ->diffInMinutes(Carbon::parse($att->clock_in_at)) - $breakMin;
                     if ($totalMin < 0) $totalMin = 0;
                 }
 
-                // 表示用の H:MM も保持（Blade で使う/デバッグしやすい）
-                $breakHm = $breakMin ? $this->minToHM($breakMin) : '—';
-                $workHm  = is_int($totalMin) ? $this->minToHM($totalMin) : '—';
-
                 $records[$d->toDateString()] = [
                     'id'             => $att->id,
-                    'clock_in'       => $att->clock_in_at,   // Carbon(キャスト済) or string
-                    'clock_out'      => $att->clock_out_at,  // Carbon(キャスト済) or string
+                    'clock_in'       => $att->clock_in_at,
+                    'clock_out'      => $att->clock_out_at,
                     'break_minutes'  => $breakMin ?: null,
                     'total_minutes'  => $totalMin,
-                    'break_hm'       => $breakHm,
-                    'work_hm'        => $workHm,
                 ];
             }
         }
 
-        // Blade に Carbon / 配列を渡す
         return view('attendance.list', [
-            'month'     => $base,                 // CarbonImmutable
-            'prevMonth' => $base->subMonth(),     // CarbonImmutable
-            'nextMonth' => $base->addMonth(),     // CarbonImmutable
-            'days'      => $days,                 // CarbonImmutable[]（1日ごと）
-            'records'   => $records,              // 'Y-m-d' => [...]
+            'month'     => $base,
+            'prevMonth' => $base->subMonth(),
+            'nextMonth' => $base->addMonth(),
+            'days'      => $days,
+            'records'   => $records,
         ]);
     }
 
-    /**
-     * PG05: 日次詳細
-     */
+    /** PG05: 日次詳細（表示） */
     public function detail(Attendance $attendance)
     {
         $attendance->load('breaks', 'user');
-        $this->authorize('view', $attendance); // 自分の勤怠のみ
-        return view('attendance.detail', compact('attendance'));
+        $this->authorize('view', $attendance);
+
+        // ★ 最新の pending 申請も取得
+        $pendingRequest = StampCorrectionRequest::where('attendance_id', $attendance->id)
+            ->where('status', 'pending')
+            ->latest('id')
+            ->first();
+
+        $hasPending = !is_null($pendingRequest);
+
+        return view('attendance.detail', [
+            'attendance'     => $attendance,
+            'hasPending'     => $hasPending,
+            'pendingRequest' => $pendingRequest,
+        ]);
     }
 
-    /**
-     * 状態遷移の共通ラッパ
-     */
+    /** PG05: 日次詳細（更新＝修正申請の作成） */
+    public function update(Request $request, Attendance $attendance)
+    {
+        if ($attendance->user_id !== Auth::id()) {
+            abort(403);
+        }
+
+        // 既存 pending があれば要件通り不可
+        $hasPending = StampCorrectionRequest::where('attendance_id', $attendance->id)
+            ->where('status', 'pending')
+            ->exists();
+        if ($hasPending) {
+            return back()->withErrors(['pending' => '承認待ちのため修正はできません。'])->withInput();
+        }
+
+        $validated = $request->validate([
+            'clock_in'   => ['nullable','date_format:H:i'],
+            'clock_out'  => ['nullable','date_format:H:i'],
+            'break1_in'  => ['nullable','date_format:H:i'],
+            'break1_out' => ['nullable','date_format:H:i'],
+            'break2_in'  => ['nullable','date_format:H:i'],
+            'break2_out' => ['nullable','date_format:H:i'],
+            'note'       => ['nullable','string','max:255'],
+            // extra_breaks[*][in/out] はここでは個別バリデーションせず、後でざっくりチェック
+        ]);
+
+        // 相関バリデーション（勤務時間と休憩1・2の関係）
+        $this->validateTimeRelations($attendance->work_date, $validated);
+
+        // 変換ヘルパ
+        $toDT = function ($hm) use ($attendance) {
+            return $hm
+                ? Carbon::createFromFormat(
+                    'Y-m-d H:i',
+                    Carbon::parse($attendance->work_date)->format('Y-m-d').' '.$hm
+                  )
+                : null;
+        };
+
+        $reqClockIn  = $toDT($validated['clock_in']  ?? null);
+        $reqClockOut = $toDT($validated['clock_out'] ?? null);
+
+        // 休憩合計（分）を計算（休憩1/2）
+        $pairs = [
+            [$validated['break1_in'] ?? null, $validated['break1_out'] ?? null],
+            [$validated['break2_in'] ?? null, $validated['break2_out'] ?? null],
+        ];
+
+        // ★ 休憩3以降（extra_breaks[0][in/out] 形式）の入力も合計に含める
+        $extraInputs = $request->input('extra_breaks', []);
+        foreach ($extraInputs as $ex) {
+            $iHm = $ex['in']  ?? null;
+            $oHm = $ex['out'] ?? null;
+
+            // 両方入っていて H:i 形式なら集計対象にする
+            if ($iHm && $oHm &&
+                preg_match('/^\d{2}:\d{2}$/', $iHm) &&
+                preg_match('/^\d{2}:\d{2}$/', $oHm)) {
+                $pairs[] = [$iHm, $oHm];
+            }
+        }
+
+        $breakMin = 0;
+        foreach ($pairs as [$i, $o]) {
+            if ($i && $o) {
+                $ii = $toDT($i);
+                $oo = $toDT($o);
+                if ($ii && $oo && $oo->greaterThan($ii)) {
+                    $breakMin += $oo->diffInMinutes($ii);
+                }
+            }
+        }
+        $breakMin = $breakMin > 0 ? $breakMin : null;
+
+        // 勤怠は更新せず、修正申請を作成
+        StampCorrectionRequest::create([
+            'attendance_id'            => $attendance->id,
+            'requested_by'             => Auth::id(),
+            'status'                   => 'pending',
+            'requested_clock_in_at'    => $reqClockIn,
+            'requested_clock_out_at'   => $reqClockOut,
+            'requested_break_minutes'  => $breakMin,
+            'requested_note'           => $validated['note'] ?? null,
+        ]);
+
+        return redirect()
+            ->route('attendance.detail', $attendance)
+            ->with('ok', true);
+    }
+
+    /** 相関チェック */
+    private function validateTimeRelations($workDate, array $v): void
+    {
+        $toDT = function ($hm) use ($workDate) {
+            return $hm ? Carbon::createFromFormat('Y-m-d H:i', Carbon::parse($workDate)->format('Y-m-d').' '.$hm) : null;
+        };
+
+        $ci = $toDT($v['clock_in']  ?? null);
+        $co = $toDT($v['clock_out'] ?? null);
+
+        $b1i = $toDT($v['break1_in']  ?? null);
+        $b1o = $toDT($v['break1_out'] ?? null);
+        $b2i = $toDT($v['break2_in']  ?? null);
+        $b2o = $toDT($v['break2_out'] ?? null);
+
+        $errors = [];
+
+        if ($ci && $co && $co->lessThanOrEqualTo($ci)) {
+            $errors['clock_out'] = '退勤時間が出勤時間より前になっています。';
+        }
+        if ($b1i && $b1o && $b1o->lessThanOrEqualTo($b1i)) {
+            $errors['break1_out'] = '休憩1の終了が開始より前になっています。';
+        }
+        if ($b2i && $b2o && $b2o->lessThanOrEqualTo($b2i)) {
+            $errors['break2_out'] = '休憩2の終了が開始より前になっています。';
+        }
+        foreach ([['i'=>$b1i,'o'=>$b1o,'k'=>'break1_in'],['i'=>$b2i,'o'=>$b2o,'k'=>'break2_in']] as $bk) {
+            if (($bk['i'] && $ci && $bk['i']->lessThan($ci)) || ($bk['o'] && $co && $bk['o']->greaterThan($co))) {
+                $errors[$bk['k']] = '休憩時間が勤務時間の範囲外です。';
+            }
+        }
+
+        if ($errors) {
+            throw ValidationException::withMessages($errors);
+        }
+    }
+
+    /** 遷移の共通処理 */
     private function transition(\Closure $handler)
     {
-        $user = Auth::user();
+        $user  = Auth::user();
         $today = CarbonImmutable::now()->timezone(config('app.timezone'))->toDateString();
-        $now = CarbonImmutable::now();
+        $now   = CarbonImmutable::now();
 
         $attendance = Attendance::firstOrCreate(
             ['user_id' => $user->id, 'work_date' => $today],

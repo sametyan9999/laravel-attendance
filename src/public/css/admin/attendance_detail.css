@@ -1,0 +1,203 @@
+/* ===================== */
+/* 勤怠詳細（管理者）     */
+/* ===================== */
+
+.adm-attd-dtl {
+    padding: 56px 0 96px;
+}
+
+.adm-attd-dtl__inner {
+    width: min(960px, calc(100% - 80px));
+    margin: 0 auto;
+}
+
+/* タイトル */
+.adm-attd-dtl__title {
+    display: flex;
+    align-items: center;
+    font-size: 24px;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    margin: 0 0 32px;
+}
+
+.adm-attd-dtl__title::before {
+    content: "";
+    display: inline-block;
+    width: 4px;
+    height: 24px;
+    margin-right: 12px;
+    border-radius: 2px;
+    background: #000;
+}
+
+/* カード全体 */
+.adm-attd-dtl__card {
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 8px 20px rgba(15, 23, 42, 0.06);
+    padding: 32px 56px 40px;
+}
+
+/* 1行ごとのレイアウト */
+.adm-attd-dtl__row {
+    display: grid;
+    grid-template-columns: 180px 1fr;
+    align-items: center;
+    padding: 18px 0;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.adm-attd-dtl__row:first-of-type {
+    padding-top: 8px;
+}
+
+.adm-attd-dtl__row:last-of-type {
+    border-bottom: none;
+    padding-bottom: 24px;
+}
+
+/* 見出しセル（左） */
+.adm-attd-dtl__th {
+    font-size: 14px;
+    font-weight: 700;
+    color: #4b5563;
+}
+
+/* 値セル（右） */
+.adm-attd-dtl__td {
+    font-size: 14px;
+}
+
+/* 名前表示 */
+.adm-attd-dtl__name {
+    font-size: 16px;
+    font-weight: 700;
+}
+
+/* 日付表示 */
+.adm-attd-dtl__td--date {
+    display: flex;
+    gap: 18px;
+    align-items: center;
+}
+
+.adm-attd-dtl__date-year {
+    font-size: 16px;
+    /* 年と日付を揃えた */
+    font-weight: 400;
+    letter-spacing: 0.08em;
+}
+
+.adm-attd-dtl__date-main {
+    font-size: 16px;
+    /* 統一 */
+    font-weight: 400;
+    /* 太字を解除 */
+    letter-spacing: 0.08em;
+}
+
+/* 時刻レンジ（出勤・退勤 / 休憩） */
+.adm-attd-dtl__time-range {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.adm-attd-dtl__time-input {
+    width: 104px;
+    height: 32px;
+    padding: 4px 6px;
+    border-radius: 4px;
+    border: 1px solid #d1d5db;
+    font-size: 14px;
+    text-align: center;
+    background: #fff;
+}
+
+.adm-attd-dtl__time-input:focus {
+    outline: none;
+    border-color: #111827;
+    box-shadow: 0 0 0 1px rgba(17, 24, 39, 0.1);
+}
+
+.adm-attd-dtl__tilde {
+    font-size: 14px;
+    color: #6b7280;
+}
+
+/* 備考 */
+.adm-attd-dtl__row--note {
+    align-items: flex-start;
+}
+
+.adm-attd-dtl__note {
+    width: 100%;
+    min-height: 80px;
+    padding: 10px 12px;
+    border-radius: 4px;
+    border: 1px solid #d1d5db;
+    font-size: 14px;
+    resize: vertical;
+    background: #fff;
+}
+
+.adm-attd-dtl__note:focus {
+    outline: none;
+    border-color: #111827;
+    box-shadow: 0 0 0 1px rgba(17, 24, 39, 0.1);
+}
+
+/* エラー表示 */
+.adm-attd-dtl__error {
+    margin: 6px 0 0;
+    font-size: 12px;
+    color: #e11d48;
+}
+
+/* ============================= */
+/*     修正ボタン（カード外）     */
+/* ============================= */
+
+/* ボタン行：白枠のすぐ下・右下に揃える */
+.adm-attd-dtl__actions {
+    width: min(960px, calc(100% - 80px));
+    margin: 24px auto 0;
+    display: flex;
+    justify-content: flex-end;
+}
+
+/* 四角ボタン（参考画像と同じ） */
+.adm-attd-dtl__submit {
+    width: 120px;
+    height: 40px;
+    background: #000;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    /* 四角 */
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+}
+
+.adm-attd-dtl__submit:hover {
+    opacity: 0.85;
+}
+
+/* スマホ向け軽い調整 */
+@media (max-width: 768px) {
+    .adm-attd-dtl__inner {
+        width: calc(100% - 32px);
+    }
+
+    .adm-attd-dtl__card {
+        padding: 24px 16px 28px;
+    }
+
+    .adm-attd-dtl__row {
+        grid-template-columns: 120px 1fr;
+        padding: 14px 0;
+    }
+}

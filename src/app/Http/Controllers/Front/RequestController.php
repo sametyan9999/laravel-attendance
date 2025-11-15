@@ -29,8 +29,8 @@ class RequestController extends Controller
             ->latest()
             ->get();
 
-        // ビューは resources/views/request/my_index.blade.php を想定
-        return view('request.my_index', compact('pending', 'approved'));
+        // ビューは resources/views/request/request_index.blade.php
+        return view('request.request_index', compact('pending', 'approved'));
     }
 
     /**

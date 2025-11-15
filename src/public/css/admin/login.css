@@ -1,0 +1,111 @@
+.admin-login {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 80px 16px 120px;
+    display: flex;
+    justify-content: center;
+}
+
+.admin-login__inner {
+    width: 100%;
+    max-width: 560px;
+    margin-top: 40px;
+}
+
+.admin-login__title {
+    margin: 0 0 56px;
+    text-align: center;
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+}
+
+/* フォーム全体 */
+.admin-login__form {
+    display: block;
+}
+
+/* ラベル＋入力 */
+.admin-login__field {
+    margin-bottom: 32px;
+}
+
+.admin-login__label {
+    display: block;
+    margin-bottom: 10px;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.admin-login__input {
+    display: block;
+    width: 100%;
+    height: 52px;
+    padding: 0 12px;
+    border-radius: 0;
+    border: 1px solid #111111;
+    font-size: 16px;
+    box-sizing: border-box;
+    background-color: #ffffff;
+}
+
+/* エラー表示 */
+.admin-login__error {
+    margin-top: 8px;
+    font-size: 13px;
+    color: #b91c1c;
+}
+
+.admin-login__error-block {
+    margin: 8px 0 24px;
+    padding: 10px 14px;
+    border-radius: 6px;
+    border: 1px solid #fecaca;
+    background-color: #fef2f2;
+    color: #b91c1c;
+    font-size: 13px;
+}
+
+.admin-login__error-block ul {
+    margin: 0;
+    padding-left: 18px;
+}
+
+/* ボタン */
+.admin-login__actions {
+    margin-top: 24px;
+}
+
+.admin-login__button {
+    display: block;
+    width: 100%;
+    height: 52px;
+    border: none;
+    border-radius: 0;
+    background-color: #000000;
+    color: #ffffff;
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    cursor: pointer;
+}
+
+.admin-login__button:hover {
+    opacity: 0.85;
+}
+
+/* レスポンシブ（PC 1400〜1540px を基準に、狭い幅での余白調整だけ） */
+@media (max-width: 768px) {
+    .admin-login {
+        padding-top: 48px;
+    }
+
+    .admin-login__inner {
+        margin-top: 24px;
+    }
+
+    .admin-login__title {
+        font-size: 22px;
+        margin-bottom: 40px;
+    }
+}

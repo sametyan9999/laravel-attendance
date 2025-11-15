@@ -12,21 +12,29 @@ use Illuminate\Support\Facades\DB;
 class RequestController extends Controller
 {
     /**
-     * PG12: 申請一覧（承認待ち/承認済み）
+     * PG12: 申請一覧（承認待ち / 承認済み）
      */
-    public function index()
+    public function index(HttpRequest $http)
     {
-        $pending = StampCorrectionRequest::with(['attendance.user'])
-            ->where('status', 'pending')
-            ->latest()
-            ->paginate(20);
+        // ?tab=pending / approved でタブを切り替え
+        $tab = $http->query('tab', 'pending');
 
-        $approved = StampCorrectionRequest::with(['attendance.user'])
-            ->where('status', 'approved')
-            ->latest()
-            ->paginate(20);
+        $query = StampCorrectionRequest::with(['requester', 'attendance']);
 
-        return view('admin.request.index', compact('pending', 'approved'));
+        if ($tab === 'approved') {
+            $query->where('status', 'approved');
+        } else {
+            // それ以外は強制的に pending に寄せる
+            $tab = 'pending';
+            $query->where('status', 'pending');
+        }
+
+        $requests = $query->orderByDesc('created_at')->paginate(20);
+
+        return view('admin.request.index', [
+            'requests' => $requests,
+            'tab'      => $tab,
+        ]);
     }
 
     /**
@@ -34,12 +42,19 @@ class RequestController extends Controller
      */
     public function show(StampCorrectionRequest $stampRequest)
     {
-        $stampRequest->load(['attendance.breaks', 'attendance.user', 'requestedBy', 'approvedBy']);
+        // ★ モデル側のリレーション名（requester / approver）に合わせる
+        $stampRequest->load([
+            'attendance.breaks',
+            'attendance.user',
+            'requester',
+            'approver',
+        ]);
+
         return view('admin.request.show', ['req' => $stampRequest]);
     }
 
     /**
-     * PG13: 承認
+     * PG13: 承認（「修正」ボタン）
      */
     public function approve(HttpRequest $http, StampCorrectionRequest $stampRequest)
     {
@@ -86,7 +101,7 @@ class RequestController extends Controller
                 ? 'completed'
                 : ($attendance->clock_in_at ? 'working' : 'off_duty');
 
-            // 管理メモを利用する場合（任意。attendanceにnoteを持たせている前提）
+            // 管理メモを利用する場合（attendance に note を持たせている前提）
             if (!empty($data['note'])) {
                 $attendance->note = trim((string) $data['note']);
             }
@@ -108,7 +123,7 @@ class RequestController extends Controller
      */
     public function reject(HttpRequest $http, StampCorrectionRequest $stampRequest)
     {
-        // 却下理由を保存したい場合（任意。ここでは requested_note を流用せず、必要なら別カラムを検討）
+        // 却下理由を保存したい場合（任意）
         $data = $http->validate([
             'reason' => ['nullable', 'string', 'max:255'],
         ]);
@@ -118,7 +133,7 @@ class RequestController extends Controller
             $stampRequest->approved_by = Auth::id();
             $stampRequest->approved_at = now();
 
-            // もし申請エンティティに管理側メモ用のカラムを追加しているなら保存する想定
+            // 必要ならここで管理メモ用カラムに保存する想定
             // 例）$stampRequest->admin_note = $data['reason'] ?? null;
 
             $stampRequest->save();

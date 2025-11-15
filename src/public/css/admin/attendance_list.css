@@ -1,0 +1,167 @@
+/* ===================== */
+/* 勤怠一覧（管理者）     */
+/* ===================== */
+
+.adm-att {
+    padding: 56px 0 96px;
+}
+
+.adm-att__inner {
+    width: min(960px, calc(100% - 80px));
+    margin: 0 auto;
+}
+
+/* タイトル（2023年6月1日の勤怠） */
+.adm-att__title {
+    display: flex;
+    align-items: center;
+    font-size: 26px;
+    /* 少し大きく */
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    margin: 0 0 32px;
+}
+
+.adm-att__title::before {
+    content: "";
+    width: 6px;
+    height: 24px;
+    background: #000;
+    border-radius: 3px;
+    display: inline-block;
+    margin-right: 14px;
+}
+
+/* 日付切り替えバー */
+.adm-att__toolbar {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 140px 1fr 140px;
+    align-items: center;
+    background: #fff;
+    padding: 16px 28px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    margin-bottom: 32px;
+    font-size: 15px;
+    /* 文字大きめ */
+}
+
+.adm-att__nav {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: #111;
+    text-decoration: none;
+}
+
+.adm-att__nav-icon {
+    font-size: 14px;
+}
+
+.adm-att__nav--prev {
+    justify-content: flex-start;
+}
+
+.adm-att__nav--current {
+    justify-content: center;
+    font-weight: 700;
+}
+
+.adm-att__nav--next {
+    justify-content: flex-end;
+}
+
+/* 一覧カード全体 */
+.adm-att__card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 4px 0;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+/* テーブル共通 */
+.adm-att__table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 15px;
+    /* 全体的に大きめ */
+}
+
+/* ヘッダー行（背景色なし） */
+.adm-att__table thead tr {
+    background: #fff;
+    /* 参考画像通り「色なし」 */
+}
+
+.adm-att__table th {
+    font-weight: 700;
+    color: #333;
+    padding: 14px 24px;
+    /* 少し高さを出す */
+    border-bottom: 1px solid #dcdcdc;
+}
+
+/* データ行 */
+.adm-att__table td {
+    padding: 14px 24px;
+    border-bottom: 1px solid #e5e5e5;
+}
+
+.adm-att__cell-name {
+    text-align: left;
+    font-weight: 500;
+}
+
+/* 詳細リンク：太字・下線なし・黒 */
+.adm-att__detail-link {
+    font-size: 15px;
+    font-weight: 700;
+    color: #000;
+    text-decoration: none;
+}
+
+.adm-att__detail-link:hover {
+    opacity: 0.6;
+}
+
+.adm-att__detail-link--disabled {
+    font-size: 15px;
+    font-weight: 700;
+    color: #b3b3b3;
+    text-decoration: none;
+}
+
+/* データなし */
+.adm-att__empty {
+    padding: 32px 0;
+    font-size: 15px;
+    color: #666;
+    text-align: center;
+}
+
+/* スマホ向け */
+@media (max-width: 768px) {
+    .adm-att__inner {
+        width: calc(100% - 32px);
+    }
+
+    .adm-att__toolbar {
+        grid-template-columns: 1fr;
+        row-gap: 10px;
+        text-align: center;
+        padding: 12px 18px;
+        font-size: 14px;
+    }
+
+    .adm-att__nav--prev,
+    .adm-att__nav--next {
+        justify-content: center;
+    }
+
+    .adm-att__table th,
+    .adm-att__table td {
+        padding: 10px 12px;
+        font-size: 14px;
+    }
+}
