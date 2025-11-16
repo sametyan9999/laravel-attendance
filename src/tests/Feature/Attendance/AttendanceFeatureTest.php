@@ -99,7 +99,7 @@ class AttendanceFeatureTest extends TestCase
         $response = $this->actingAs($user)->get('/attendance');
 
         $response->assertStatus(200);
-        $response->assertSee('勤務中');
+        $response->assertSee('出勤中');
     }
 
     /**
