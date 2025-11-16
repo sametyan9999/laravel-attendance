@@ -8,6 +8,9 @@
 
     $prevMonth = $base->subMonth()->format('Y-m');
     $nextMonth = $base->addMonth()->format('Y-m');
+
+    // 曜日表示用
+    $weekdays = ['日', '月', '火', '水', '木', '金', '土'];
 @endphp
 
 @extends('layouts.app')
@@ -15,7 +18,7 @@
 @section('title', 'スタッフ別勤怠一覧')
 
 @push('styles')
-  {{-- 勤怠一覧と同じテイストで良ければ同じCSSを使い回し --}}
+  {{-- 管理者勤怠一覧と同じテイスト --}}
   <link rel="stylesheet" href="{{ asset('css/admin/attendance_list.css') }}">
 @endpush
 
@@ -25,7 +28,7 @@
 
       {{-- タイトル：〇〇さんの2023年6月の勤怠 --}}
       <h1 class="adm-att__title">
-        {{ $user->name }} さんの {{ $base->format('Y年n月') }}の勤怠
+        {{ $user->name }} さんの {{ $base->format('Y年n月') }} の勤怠
       </h1>
 
       {{-- 月切り替えバー --}}
@@ -63,56 +66,51 @@
           </thead>
           <tbody>
           @php
-              // 勤怠一覧と同じフォーマッタ
               $fmtTime = function ($v) {
                   if (!$v) return '—';
                   return Carbon::parse($v)->format('H:i');
               };
-              $fmtMinutes = function ($attendance) {
-                  if (!$attendance) return '—';
 
-                  $breakMin = 0;
-                  foreach ($attendance->breaks ?? [] as $b) {
-                      if ($b->break_in_at && $b->break_out_at) {
-                          $in  = Carbon::parse($b->break_in_at);
-                          $out = Carbon::parse($b->break_out_at);
-                          if ($out->greaterThan($in)) {
-                              $breakMin += $out->diffInMinutes($in);
-                          }
-                      }
-                  }
-
-                  if ($attendance->clock_in_at && $attendance->clock_out_at) {
-                      $ci = Carbon::parse($attendance->clock_in_at);
-                      $co = Carbon::parse($attendance->clock_out_at);
-                      $total = $co->diffInMinutes($ci) - $breakMin;
-                      if ($total < 0) $total = 0;
-                      $h = intdiv($total, 60);
-                      $m = $total % 60;
-                      return sprintf('%d:%02d', $h, $m);
-                  }
-
-                  return '—';
+              $fmtHM = function ($min) {
+                  if (!is_numeric($min)) return '—';
+                  $h = intdiv((int)$min, 60);
+                  $m = (int)$min % 60;
+                  return sprintf('%d:%02d', $h, $m);
               };
           @endphp
 
-          @forelse($rows as $att)
+          @forelse($rows as $row)
+            @php
+              /** @var \Carbon\CarbonImmutable|\Carbon\Carbon $date */
+              $date       = $row['date'];
+              $attendance = $row['attendance'];
+              $clockIn    = $row['clock_in'];
+              $clockOut   = $row['clock_out'];
+              $breakMin   = $row['break_minutes'];
+              $totalMin   = $row['total_minutes'];
+
+              $w = $weekdays[$date->dayOfWeek] ?? '';
+            @endphp
             <tr>
+              {{-- ★ 06/01(木) のように曜日付きで表示 --}}
               <td>
-                {{ Carbon::parse($att->work_date)->format('n月j日') }}
+                {{ $date->format('m/d') }}({{ $w }})
               </td>
-              <td>{{ $fmtTime($att->clock_in_at) }}</td>
-              <td>{{ $fmtTime($att->clock_out_at) }}</td>
+              <td>{{ $fmtTime($clockIn) }}</td>
+              <td>{{ $fmtTime($clockOut) }}</td>
+              <td>{{ $fmtHM($breakMin) }}</td>
+              <td>{{ $fmtHM($totalMin) }}</td>
               <td>
-                {{-- 合計休憩時間だけざっくり表示（なくてもOKなら消してOK） --}}
-                {{ $fmtMinutes($att) === '—' ? '—' : '' }}
-              </td>
-              <td>{{ $fmtMinutes($att) }}</td>
-              <td>
-                <a href="{{ route('admin.attendance.detail', ['attendance' => $att->id]) }}"
-                   class="adm-att__detail-link">
-                  詳細
-                </a>
+                @if($attendance)
+                  <a href="{{ route('admin.attendance.detail', ['attendance' => $attendance->id]) }}"
+                     class="adm-att__detail-link">
+                    詳細
+                  </a>
+                @else
+                  <span class="adm-att__detail-link adm-att__detail-link--disabled" aria-disabled="true">
+                    詳細
+                  </span>
+                @endif
               </td>
             </tr>
           @empty
@@ -124,6 +122,14 @@
           @endforelse
           </tbody>
         </table>
+      </div>
+
+      {{-- CSV出力ボタン --}}
+      <div class="adm-att__csv">
+        <a href="{{ route('admin.attendance.by_user_csv', ['user' => $user->id, 'month' => $base->format('Y-m')]) }}"
+           class="adm-att__csv-btn">
+          CSV出力
+        </a>
       </div>
 
     </div>

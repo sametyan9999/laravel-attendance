@@ -84,41 +84,35 @@
 
 .adm-attd-dtl__date-year {
     font-size: 16px;
-    /* 年と日付を揃えた */
     font-weight: 400;
     letter-spacing: 0.08em;
 }
 
 .adm-attd-dtl__date-main {
     font-size: 16px;
-    /* 統一 */
     font-weight: 400;
-    /* 太字を解除 */
     letter-spacing: 0.08em;
 }
 
-/* 時刻レンジ（出勤・退勤 / 休憩） */
+/* ============================= */
+/*     時刻まわり                */
+/* ============================= */
+
 .adm-attd-dtl__time-range {
     display: inline-flex;
     align-items: center;
     gap: 10px;
 }
 
-.adm-attd-dtl__time-input {
-    width: 104px;
-    height: 32px;
-    padding: 4px 6px;
-    border-radius: 4px;
-    border: 1px solid #d1d5db;
-    font-size: 14px;
+/* 文字表示用（いまは未使用だが残しておく） */
+.adm-attd-dtl__time-text {
+    display: inline-block;
+    min-width: 56px;
     text-align: center;
-    background: #fff;
-}
-
-.adm-attd-dtl__time-input:focus {
-    outline: none;
-    border-color: #111827;
-    box-shadow: 0 0 0 1px rgba(17, 24, 39, 0.1);
+    letter-spacing: 0.08em;
+    font-size: 15px;
+    font-weight: 700;
+    color: #000;
 }
 
 .adm-attd-dtl__tilde {
@@ -126,26 +120,70 @@
     color: #6b7280;
 }
 
-/* 備考 */
-.adm-attd-dtl__row--note {
-    align-items: flex-start;
-}
-
-.adm-attd-dtl__note {
-    width: 100%;
-    min-height: 80px;
-    padding: 10px 12px;
+/* ▼ 入力用 time ボックス（数字欠け対策込み） */
+.adm-attd-dtl__time-input {
+    width: 130px;
+    /* 十分広くして数字が切れないように */
+    height: 40px;
+    padding: 0 12px;
     border-radius: 4px;
-    border: 1px solid #d1d5db;
-    font-size: 14px;
-    resize: vertical;
-    background: #fff;
+    border: 1px solid #d4d4d8;
+    background: #f9fafb;
+    font-size: 16px;
+    /* iOS で縮まないライン＆見やすく */
+    font-weight: 600;
+    color: #111827;
+    text-align: center;
+    letter-spacing: 0.08em;
+    outline: none;
+    box-sizing: border-box;
 }
 
-.adm-attd-dtl__note:focus {
-    outline: none;
+.adm-attd-dtl__time-input:focus {
+    background: #ffffff;
     border-color: #111827;
-    box-shadow: 0 0 0 1px rgba(17, 24, 39, 0.1);
+}
+
+/* Safari / iOS での時刻文字欠け対策 */
+.adm-attd-dtl__time-input::-webkit-date-and-time-value {
+    text-align: left;
+    padding-left: 4px;
+}
+
+/* ============================= */
+/*     備考                       */
+/* ============================= */
+
+.adm-attd-dtl__row--note .adm-attd-dtl__td {
+    display: flex;
+    align-items: center;
+}
+
+/* 備考入力（横長ボックス） */
+.adm-attd-dtl__note-input {
+    width: 60%;
+    max-width: 420px;
+    height: 40px;
+    padding: 0 14px;
+    border-radius: 4px;
+    border: 1px solid #d4d4d8;
+    background: #f9fafb;
+    font-size: 14px;
+    color: #111827;
+    outline: none;
+    box-sizing: border-box;
+}
+
+.adm-attd-dtl__note-input:focus {
+    background: #ffffff;
+    border-color: #111827;
+}
+
+/* テキスト表示用（残しておく） */
+.adm-attd-dtl__note-text {
+    font-size: 15px;
+    color: #000;
+    white-space: pre-wrap;
 }
 
 /* エラー表示 */
@@ -156,10 +194,9 @@
 }
 
 /* ============================= */
-/*     修正ボタン（カード外）     */
+/*     ボタン                     */
 /* ============================= */
 
-/* ボタン行：白枠のすぐ下・右下に揃える */
 .adm-attd-dtl__actions {
     width: min(960px, calc(100% - 80px));
     margin: 24px auto 0;
@@ -167,7 +204,6 @@
     justify-content: flex-end;
 }
 
-/* 四角ボタン（参考画像と同じ） */
 .adm-attd-dtl__submit {
     width: 120px;
     height: 40px;
@@ -175,7 +211,6 @@
     color: #fff;
     border: none;
     border-radius: 4px;
-    /* 四角 */
     font-size: 15px;
     font-weight: 700;
     letter-spacing: 0.1em;
@@ -186,7 +221,31 @@
     opacity: 0.85;
 }
 
-/* スマホ向け軽い調整 */
+/* 承認済みボタン（今は使っていないが一応残す） */
+.adm-attd-dtl__submit--done {
+    width: 120px;
+    height: 40px;
+    background: #555;
+    color: #fff;
+    border-radius: 4px;
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: default;
+    pointer-events: none;
+}
+
+.adm-attd-dtl__submit--done:hover {
+    opacity: 1;
+}
+
+/* ============================= */
+/*   スマホ向け軽い調整          */
+/* ============================= */
+
 @media (max-width: 768px) {
     .adm-attd-dtl__inner {
         width: calc(100% - 32px);
@@ -199,5 +258,15 @@
     .adm-attd-dtl__row {
         grid-template-columns: 120px 1fr;
         padding: 14px 0;
+    }
+
+    .adm-attd-dtl__note-input {
+        width: 100%;
+        max-width: none;
+    }
+
+    .adm-attd-dtl__actions {
+        width: 100%;
+        justify-content: center;
     }
 }

@@ -19,7 +19,10 @@ class RequestController extends Controller
         // ?tab=pending / approved でタブを切り替え
         $tab = $http->query('tab', 'pending');
 
-        $query = StampCorrectionRequest::with(['requester', 'attendance']);
+        $query = StampCorrectionRequest::with([
+            'requester',
+            'attendance',
+        ]);
 
         if ($tab === 'approved') {
             $query->where('status', 'approved');
@@ -42,7 +45,7 @@ class RequestController extends Controller
      */
     public function show(StampCorrectionRequest $stampRequest)
     {
-        // ★ モデル側のリレーション名（requester / approver）に合わせる
+        // モデル側のリレーション名（requester / approver）に合わせる
         $stampRequest->load([
             'attendance.breaks',
             'attendance.user',
@@ -50,6 +53,7 @@ class RequestController extends Controller
             'approver',
         ]);
 
+        // Blade では $req として扱う
         return view('admin.request.show', ['req' => $stampRequest]);
     }
 
@@ -115,7 +119,11 @@ class RequestController extends Controller
             $stampRequest->save();
         });
 
-        return back()->with('ok', true);
+        // ★ 承認後は「この申請の詳細画面（承認済み表示）」へ遷移
+        //    ルートパラメータ名は routes/web.php の {stamp_request} に合わせる
+        return redirect()
+            ->route('admin.request.show', ['stamp_request' => $stampRequest->id])
+            ->with('ok', true);
     }
 
     /**
@@ -139,6 +147,9 @@ class RequestController extends Controller
             $stampRequest->save();
         });
 
-        return back()->with('ok', true);
+        // 却下後は承認待ちタブに戻す
+        return redirect()
+            ->route('admin.request.index', ['tab' => 'pending'])
+            ->with('ok', true);
     }
 }

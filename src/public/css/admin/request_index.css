@@ -1,5 +1,5 @@
 /* ============================ */
-/* 管理者：申請一覧（PG12 相当） */
+/* 管理者：申請一覧             */
 /* ============================ */
 
 :root {
@@ -8,16 +8,15 @@
     --adm-text: #111827;
 }
 
-/* 背景色は app.css（gt-body--authed）に任せる */
-
+/* 全体コンテナ */
 .adm-req {
-    max-width: 1100px;
-    margin: 80px auto 120px;
-    padding: 0 24px;
+    padding: 56px 0 96px;
 }
 
+/* 他の管理画面と同じ幅・位置にそろえる */
 .adm-req__inner {
-    width: 100%;
+    width: min(960px, calc(100% - 80px));
+    margin: 0 auto;
 }
 
 /* タイトル「申請一覧」 */
@@ -27,13 +26,13 @@
     font-weight: 800;
     font-size: 26px;
     letter-spacing: .04em;
-    margin: 0 0 24px;
+    margin: 0 0 28px;
 }
 
 .adm-req__title::before {
     content: "";
     width: 6px;
-    height: 26px;
+    height: 24px;
     border-radius: 3px;
     background: #111;
     margin-right: 12px;
@@ -42,41 +41,43 @@
 /* タブ部分（承認待ち／承認済み） */
 .adm-req__tabs {
     display: flex;
-    gap: 40px;
+    gap: 48px;
     align-items: center;
-    margin-bottom: 24px;
-    border-bottom: 1px solid #000;
+    margin-bottom: 28px;
+    border-bottom: 1px solid #333;
     padding: 0 4px 10px;
 }
 
+/* タブ共通 */
 .adm-req__tab {
     position: relative;
     font-size: 14px;
     font-weight: 700;
     letter-spacing: .08em;
     text-decoration: none;
-    color: #111;
-    padding-bottom: 6px;
+    color: #777;
+    padding-bottom: 4px;
 }
 
-.adm-req__tab--active {
+/* Blade の is-active クラスに対応 */
+.adm-req__tab.is-active {
     color: #000;
 }
 
-.adm-req__tab--active::after {
+.adm-req__tab.is-active::after {
     content: "";
     position: absolute;
     left: 0;
     right: 0;
-    bottom: -2px;
-    height: 2px;
+    bottom: -3px;
+    height: 1px;
     background: #000;
 }
 
-/* 一覧カード */
+/* 一覧カード（他画面と同じような白BOX） */
 .adm-req__card {
     background: var(--adm-card-bg);
-    border-radius: 4px;
+    border-radius: 12px;
     border: 1px solid var(--adm-border);
     overflow: hidden;
 }
@@ -85,23 +86,30 @@
 .adm-req__table {
     width: 100%;
     border-collapse: collapse;
-    font-size: 16px;
+    font-size: 15px;
+    /* 他画面と同じくらいの大きさ */
     color: var(--adm-text);
 }
 
+/* ヘッダー行 */
+.adm-req__table thead tr {
+    background: #f5f5f5;
+}
+
 .adm-req__table thead th {
-    background: #fafafa;
-    padding: 16px 20px;
+    padding: 14px 24px;
     font-weight: 700;
     border-bottom: 1px solid var(--adm-border);
     text-align: center;
+    color: #444;
 }
 
+/* 本文行 */
 .adm-req__table tbody td {
-    padding: 16px 20px;
+    padding: 14px 24px;
     border-bottom: 1px solid var(--adm-border);
     text-align: center;
-    height: 60px;
+    height: 56px;
 }
 
 .adm-req__table tbody tr:last-child td {
@@ -133,41 +141,71 @@
     width: 8%;
 }
 
-/* 理由列は少し左寄せ */
+/* 理由・名前は左寄せ */
 .adm-req__cell-reason {
     text-align: left;
 }
 
-/* 詳細ボタン */
+.col-name {
+    text-align: left;
+}
+
+/* 詳細リンク（他画面と共通：枠なし・太字・黒） */
 .adm-req__detail-link {
-    display: inline-block;
-    padding: 6px 14px;
-    border-radius: 20px;
-    border: 1px solid #111;
-    text-decoration: none;
-    font-size: 14px;
+    font-size: 15px;
     font-weight: 700;
-    color: #111;
+    color: #000;
+    text-decoration: none;
+    border: none;
+    padding: 0;
+    background: none;
+    border-radius: 0;
+    display: inline;
+    cursor: pointer;
 }
 
 .adm-req__detail-link:hover {
-    opacity: 0.7;
+    opacity: 0.6;
 }
 
 /* データなし */
 .adm-req__empty {
     text-align: center;
     padding: 32px 20px;
+    font-size: 15px;
     color: #6b7280;
 }
 
 /* スマホ簡易対応 */
 @media (max-width: 768px) {
-    .adm-req {
-        padding: 0 12px;
+    .adm-req__inner {
+        width: calc(100% - 32px);
     }
 
     .adm-req__table {
         min-width: 720px;
     }
+
+    .adm-req__table thead th,
+    .adm-req__table tbody td {
+        padding: 10px 12px;
+        font-size: 14px;
+    }
+}
+
+/* 状態列の折り返しを禁止（横並びにする） */
+.adm-req__table td.col-status,
+.adm-req__table th.col-status {
+    white-space: nowrap;
+}
+
+/* 詳細列の折り返しを禁止（横1行に固定） */
+.adm-req__table td.col-detail,
+.adm-req__table th.col-detail {
+    white-space: nowrap;
+    word-break: normal;
+}
+
+.col-detail {
+    width: 10%;
 }

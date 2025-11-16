@@ -1,3 +1,4 @@
+{{-- resources/views/attendance/today.blade.php --}}
 @extends('layouts.app')
 
 @section('title', '勤怠登録')
@@ -5,6 +6,13 @@
 @section('content')
   {{-- ページ専用CSS --}}
   <link rel="stylesheet" href="{{ asset('css/attendance/today.css') }}"/>
+
+  @php
+    // ★ ここで「日本語ロケール＋タイムゾーン」を確実に適用した now を用意
+    $nowJp = $now->copy()
+                 ->timezone(config('app.timezone'))
+                 ->locale('ja');
+  @endphp
 
   <div class="attd-wrap">
     <div class="attd-inner">
@@ -21,14 +29,14 @@
         <span class="pill pill-{{ $attendance->status }}">{{ $label }}</span>
       </div>
 
-      {{-- 日付 --}}
+      {{-- 日付（YYYY年M月D日(ddd)） --}}
       <div class="attd-date">
-        {{ $now->isoFormat('YYYY年M月D日(ddd)') }}
+        {{ $nowJp->isoFormat('YYYY年M月D日(ddd)') }}
       </div>
 
-      {{-- 現在時刻 --}}
+      {{-- 現在時刻（HH:MM） --}}
       <div class="attd-clock">
-        {{ $now->format('H:i') }}
+        {{ $nowJp->format('H:i') }}
       </div>
 
       {{-- アクション（working時のみ横並び、break時は白ボタン用クラス） --}}

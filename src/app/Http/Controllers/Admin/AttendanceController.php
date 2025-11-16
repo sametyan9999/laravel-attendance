@@ -10,6 +10,7 @@ use Carbon\Carbon;
 use Carbon\CarbonImmutable;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 
 class AttendanceController extends Controller
 {
@@ -125,29 +126,136 @@ class AttendanceController extends Controller
     }
 
     /**
-     * PG11: スタッフ別 月次一覧
+     * PG11: スタッフ別 月次一覧（1ヶ月分の日を全部出す）
      */
     public function byUser(Request $request, User $user)
     {
-        // Laravel9 なので string() ではなく get() を使用
+        // ?month=YYYY-MM があればその月、無ければ今月
         $month = $request->get('month');
 
         $base = $month
-            ? CarbonImmutable::parse($month . '-01')
-            : CarbonImmutable::now();
+            ? CarbonImmutable::parse($month . '-01')->startOfMonth()
+            : CarbonImmutable::now()->startOfMonth();
 
-        $start = $base->startOfMonth()->toDateString();
-        $end   = $base->endOfMonth()->toDateString();
+        $start = $base->startOfMonth();
+        $end   = $base->endOfMonth();
 
-        $rows = Attendance::where('user_id', $user->id)
-            ->whereBetween('work_date', [$start, $end])
+        // この月の勤怠をまとめて取得して work_date でキー化
+        $attendances = Attendance::with('breaks')
+            ->where('user_id', $user->id)
+            ->whereBetween('work_date', [$start->toDateString(), $end->toDateString()])
             ->orderBy('work_date')
-            ->get();
+            ->get()
+            ->keyBy(function (Attendance $att) {
+                return Carbon::parse($att->work_date)->format('Y-m-d');
+            });
+
+        $rows = [];
+
+        // 1日〜末日までループして、無い日も1行作る
+        for ($d = $start; $d <= $end; $d = $d->addDay()) {
+            $key = $d->toDateString();
+            /** @var Attendance|null $att */
+            $att = $attendances->get($key);
+
+            $breakMinutes = null;
+            $totalMinutes = null;
+            $clockIn      = null;
+            $clockOut     = null;
+
+            if ($att) {
+                $clockIn  = $att->clock_in_at;
+                $clockOut = $att->clock_out_at;
+                [$breakMinutes, $totalMinutes] = $this->calcMinutes($att);
+            }
+
+            $rows[] = [
+                'date'          => $d,
+                'attendance'    => $att,
+                'clock_in'      => $clockIn,
+                'clock_out'     => $clockOut,
+                'break_minutes' => $breakMinutes,
+                'total_minutes' => $totalMinutes,
+            ];
+        }
 
         return view('admin.attendance.by_user', [
             'user'  => $user,
             'rows'  => $rows,
             'month' => $base->format('Y-m'),
+        ]);
+    }
+
+    /**
+     * ★ PG11: スタッフ別 月次一覧 CSV 出力
+     */
+    public function byUserCsv(Request $request, User $user)
+    {
+        // ?month=YYYY-MM があればその月、無ければ今月
+        $month = $request->get('month');
+
+        $base = $month
+            ? CarbonImmutable::parse($month . '-01')->startOfMonth()
+            : CarbonImmutable::now()->startOfMonth();
+
+        $start = $base->startOfMonth();
+        $end   = $base->endOfMonth();
+
+        // この月の勤怠をまとめて取得して work_date でキー化
+        $attendances = Attendance::with('breaks')
+            ->where('user_id', $user->id)
+            ->whereBetween('work_date', [$start->toDateString(), $end->toDateString()])
+            ->orderBy('work_date')
+            ->get()
+            ->keyBy(function (Attendance $att) {
+                return Carbon::parse($att->work_date)->format('Y-m-d');
+            });
+
+        $filename = sprintf('%s_%s_attendance.csv', $user->name, $base->format('Y-m'));
+
+        return response()->streamDownload(function () use ($start, $end, $attendances, $user) {
+            $out = fopen('php://output', 'w');
+
+            // ヘッダー行
+            fputcsv($out, ['氏名', '日付', '出勤', '退勤', '休憩', '合計']);
+
+            $fmtTime = function ($v) {
+                if (!$v) return '';
+                return Carbon::parse($v)->format('H:i');
+            };
+
+            $fmtHM = function ($min) {
+                if (!is_numeric($min)) return '';
+                $h = intdiv((int)$min, 60);
+                $m = (int)$min % 60;
+                return sprintf('%d:%02d', $h, $m);
+            };
+
+            for ($d = $start; $d <= $end; $d = $d->addDay()) {
+                $key = $d->format('Y-m-d');
+                /** @var Attendance|null $att */
+                $att = $attendances->get($key);
+
+                $clockIn  = $att?->clock_in_at;
+                $clockOut = $att?->clock_out_at;
+
+                [$breakMin, $totalMin] = $att
+                    ? $this->calcMinutes($att)
+                    : [null, null];
+
+                fputcsv($out, [
+                    $user->name,
+                    $d->format('Y-m-d'),
+                    $fmtTime($clockIn),
+                    $fmtTime($clockOut),
+                    $fmtHM($breakMin),
+                    $fmtHM($totalMin),
+                ]);
+            }
+
+            fclose($out);
+        }, $filename, [
+            'Content-Type' => 'text/csv; charset=UTF-8',
         ]);
     }
 
@@ -163,27 +271,72 @@ class AttendanceController extends Controller
 
     /**
      * PG09: 日次の直接修正
+     * （バリデーション内容・メッセージは機能要件 FN039 に合わせる）
      */
     public function update(Request $request, Attendance $attendance)
     {
-        $messages = [
-            'clock_in_at.date'                     => '出勤時間が不適切な値です',
-            'clock_out_at.date'                    => '退勤時間が不適切な値です',
-            'clock_out_at.after_or_equal'          => '退勤時間が出勤時間より後になっている必要があります',
-            'breaks.*.break_in_at.date'            => '休憩時間が不適切な値です',
-            'breaks.*.break_out_at.after_or_equal' => '休憩時間が不適切な値です',
-            'note.max'                             => '備考は255文字以内で入力してください',
+        // 1次バリデーション（形式チェック）
+        $rules = [
+            // 出勤・退勤 … time型入力なので H:i 形式でチェック
+            'clock_in_at'   => ['nullable', 'date_format:H:i'],
+            'clock_out_at'  => ['nullable', 'date_format:H:i'],
+
+            // 備考（★ 必須に変更）
+            'note' => ['required', 'string', 'max:255'],
+
+            // ステータス
+            'status' => ['required', 'in:off_duty,working,break,completed'],
+
+            // 休憩
+            'breaks'                => ['array'],
+            'breaks.*.break_in_at'  => ['nullable', 'date_format:H:i'],
+            'breaks.*.break_out_at' => ['nullable', 'date_format:H:i'],
         ];
 
-        $data = $request->validate([
-            'clock_in_at'              => ['nullable', 'date'],
-            'clock_out_at'             => ['nullable', 'date', 'after_or_equal:clock_in_at'],
-            'note'                     => ['nullable', 'string', 'max:255'],
-            'status'                   => ['required', 'in:off_duty,working,break,completed'],
-            'breaks'                   => ['array'],
-            'breaks.*.break_in_at'     => ['nullable', 'date'],
-            'breaks.*.break_out_at'    => ['nullable', 'date', 'after_or_equal:breaks.*.break_in_at'],
-        ], $messages);
+        $messages = [
+            // 形式エラー
+            'clock_in_at.date_format'           => '出勤時刻が不適切な値です',
+            'clock_out_at.date_format'          => '退勤時刻が不適切な値です',
+            'breaks.*.break_in_at.date_format'  => '休憩時間が不適切な値です',
+            'breaks.*.break_out_at.date_format' => '休憩時間が不適切な値です',
+
+            // 備考
+            'note.required'                     => '備考を記入してください',
+            'note.max'                          => '備考は255文字以内で入力してください',
+        ];
+
+        $validator = Validator::make($request->all(), $rules, $messages);
+
+        // 2次バリデーション（前後関係のチェック）
+        $validator->after(function ($validator) use ($request) {
+            $ci = $request->input('clock_in_at');   // HH:MM or null
+            $co = $request->input('clock_out_at');
+
+            // 出勤時刻・退勤時刻の前後関係
+            if ($ci !== null && $co !== null && $co < $ci) {
+                // 機能要件の文言に合わせる
+                $validator->errors()->add(
+                    'clock_out_at',
+                    '出勤時刻もしくは退勤時刻が不適切な値です'
+                );
+            }
+
+            // 各休憩の前後関係
+            foreach ((array) $request->input('breaks', []) as $idx => $b) {
+                $bi = $b['break_in_at']  ?? null;
+                $bo = $b['break_out_at'] ?? null;
+
+                if ($bi !== null && $bo !== null && $bo < $bi) {
+                    $validator->errors()->add(
+                        "breaks.$idx.break_out_at",
+                        '休憩時間が不適切な値です'
+                    );
+                }
+            }
+        });
+
+        // バリデーション実行（エラー時は自動でリダイレクト）
+        $data = $validator->validate();
 
         DB::transaction(function () use ($attendance, $data) {
             $attendance->fill([

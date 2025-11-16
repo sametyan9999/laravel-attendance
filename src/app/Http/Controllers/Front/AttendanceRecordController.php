@@ -18,8 +18,13 @@ class AttendanceRecordController extends Controller
     /** PG03: 本日の打刻画面 */
     public function today(Request $request)
     {
-        $user  = Auth::user();
-        $today = CarbonImmutable::now()->timezone(config('app.timezone'))->toDateString();
+        $user = Auth::user();
+
+        // ★ タイムゾーンを明示した「今」
+        $now = CarbonImmutable::now()->timezone(config('app.timezone'));
+
+        // その日の「日付」だけ切り出し
+        $today = $now->toDateString();
 
         $attendance = Attendance::firstOrCreate(
             ['user_id' => $user->id, 'work_date' => $today],
@@ -28,7 +33,8 @@ class AttendanceRecordController extends Controller
 
         return view('attendance.today', [
             'attendance' => $attendance,
-            'now'        => CarbonImmutable::now(),
+            // ★ 画面にもタイムゾーン付き now を渡す
+            'now'        => $now,
         ]);
     }
 
@@ -265,16 +271,23 @@ class AttendanceRecordController extends Controller
         }
         $breakMin = $breakMin > 0 ? $breakMin : null;
 
-        // 勤怠は更新せず、修正申請を作成
-        StampCorrectionRequest::create([
-            'attendance_id'            => $attendance->id,
-            'requested_by'             => Auth::id(),
-            'status'                   => 'pending',
-            'requested_clock_in_at'    => $reqClockIn,
-            'requested_clock_out_at'   => $reqClockOut,
-            'requested_break_minutes'  => $breakMin,
-            'requested_note'           => $validated['note'] ?? null,
-        ]);
+        // ★ 勤怠の備考と修正申請をまとめて保存
+        DB::transaction(function () use ($attendance, $validated, $reqClockIn, $reqClockOut, $breakMin) {
+            // 勤怠レコード側の備考を更新
+            $attendance->note = $validated['note'] ?? null;
+            $attendance->save();
+
+            // 修正申請レコードを作成
+            StampCorrectionRequest::create([
+                'attendance_id'            => $attendance->id,
+                'requested_by'             => Auth::id(),
+                'status'                   => 'pending',
+                'requested_clock_in_at'    => $reqClockIn,
+                'requested_clock_out_at'   => $reqClockOut,
+                'requested_break_minutes'  => $breakMin,
+                'requested_note'           => $attendance->note, // ← 備考をここにもコピー
+            ]);
+        });
 
         return redirect()
             ->route('attendance.detail', $attendance)
@@ -321,9 +334,11 @@ class AttendanceRecordController extends Controller
     /** 遷移の共通処理 */
     private function transition(\Closure $handler)
     {
-        $user  = Auth::user();
-        $today = CarbonImmutable::now()->timezone(config('app.timezone'))->toDateString();
-        $now   = CarbonImmutable::now();
+        $user = Auth::user();
+
+        // ★ ここもタイムゾーンを明示して統一
+        $now   = CarbonImmutable::now()->timezone(config('app.timezone'));
+        $today = $now->toDateString();
 
         $attendance = Attendance::firstOrCreate(
             ['user_id' => $user->id, 'work_date' => $today],

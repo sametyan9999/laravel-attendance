@@ -19,7 +19,10 @@
     <h1 class="adm-req__title">申請一覧</h1>
 
     {{-- タブ（承認待ち / 承認済み） --}}
-    @php $tab = $tab ?? 'pending'; @endphp
+    @php
+        // コントローラから渡ってくる $tab を信頼しつつ、保険でデフォルト pending
+        $tab = $tab ?? 'pending';
+    @endphp
     <div class="adm-req__tabs" role="tablist">
       <a href="{{ route('admin.request.index', ['tab' => 'pending']) }}"
          class="adm-req__tab {{ $tab === 'pending' ? 'is-active' : '' }}">
@@ -47,14 +50,12 @@
         <tbody>
         @forelse($requests as $req)
           @php
-              // 状態ラベル
-              $statusLabel = match ($req->status) {
-                  'approved' => '承認済み',
-                  'rejected' => '却下',
-                  default    => '承認待ち',
-              };
+              /** @var \App\Models\StampCorrectionRequest $req */
 
-              // 対象日時（勤怠の日付＋出勤時刻など、持っている情報に合わせて整形）
+              // ▼ 状態ラベルは「どのタブか」で決める
+              $statusLabel = $tab === 'approved' ? '承認済み' : '承認待ち';
+
+              // 対象日時
               $workDate = optional($req->attendance)->work_date;
               if ($workDate instanceof \Carbon\Carbon) {
                   $workDateText = $workDate->format('Y/m/d');
@@ -69,24 +70,24 @@
           @endphp
           <tr>
             {{-- 状態 --}}
-            <td>{{ $statusLabel }}</td>
+            <td class="col-status">{{ $statusLabel }}</td>
 
-            {{-- 申請者名（StampCorrectionRequest::requester 関連） --}}
-            <td>{{ optional($req->requester)->name ?? '' }}</td>
+            {{-- 申請者名 --}}
+            <td class="col-name">{{ optional($req->requester)->name ?? '' }}</td>
 
             {{-- 対象日時 --}}
-            <td>{{ $workDateText }}</td>
+            <td class="col-target">{{ $workDateText }}</td>
 
-            {{-- 申請理由（requested_note を想定） --}}
-            <td class="adm-req__cell-reason">
+            {{-- 申請理由 --}}
+            <td class="adm-req__cell-reason col-reason">
               {{ $req->requested_note ?? '' }}
             </td>
 
             {{-- 申請日時 --}}
-            <td>{{ $createdAt }}</td>
+            <td class="col-date">{{ $createdAt }}</td>
 
             {{-- 詳細リンク --}}
-            <td>
+            <td class="col-detail">
               <a href="{{ route('admin.request.show', ['stamp_request' => $req->id]) }}"
                  class="adm-req__detail-link">
                 詳細
@@ -103,7 +104,7 @@
         </tbody>
       </table>
 
-      {{-- ページネーション（必要なら） --}}
+      {{-- ページネーション --}}
       <div class="adm-req__pagination">
         {{ $requests->withQueryString()->links() }}
       </div>

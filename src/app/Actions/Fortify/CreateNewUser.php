@@ -29,11 +29,25 @@ class CreateNewUser implements CreatesNewUsers
                 Rule::unique(User::class),
             ],
             'password' => $this->passwordRules(),
+        ], [
+            // ▼ ここから日本語エラーメッセージ
+            'name.required'      => '名前を入力してください',
+            'name.string'        => '名前を正しく入力してください',
+            'name.max'           => '名前は255文字以内で入力してください',
+
+            'email.required'     => 'メールアドレスを入力してください',
+            'email.email'        => 'メールアドレスの形式が不適切です',
+            'email.max'          => 'メールアドレスは255文字以内で入力してください',
+            'email.unique'       => 'このメールアドレスは既に登録されています',
+
+            'password.required'  => 'パスワードを入力してください',
+            'password.min'       => 'パスワードは8文字以上で入力してください',
+            'password.confirmed' => 'パスワードが一致しません',
         ])->validate();
 
         return User::create([
-            'name' => $input['name'],
-            'email' => $input['email'],
+            'name'     => $input['name'],
+            'email'    => $input['email'],
             'password' => Hash::make($input['password']),
         ]);
     }

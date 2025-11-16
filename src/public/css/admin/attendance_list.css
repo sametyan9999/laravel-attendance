@@ -1,5 +1,5 @@
 /* ===================== */
-/* 勤怠一覧（管理者）     */
+/* 勤怠一覧（管理者共通） */
 /* ===================== */
 
 .adm-att {
@@ -11,12 +11,11 @@
     margin: 0 auto;
 }
 
-/* タイトル（2023年6月1日の勤怠） */
+/* タイトル（例：2023年6月1日の勤怠） */
 .adm-att__title {
     display: flex;
     align-items: center;
     font-size: 26px;
-    /* 少し大きく */
     font-weight: 800;
     letter-spacing: 0.06em;
     margin: 0 0 32px;
@@ -24,27 +23,29 @@
 
 .adm-att__title::before {
     content: "";
+    display: inline-block;
     width: 6px;
     height: 24px;
-    background: #000;
-    border-radius: 3px;
-    display: inline-block;
     margin-right: 14px;
+    border-radius: 3px;
+    background: #000;
 }
 
-/* 日付切り替えバー */
+/* ===================== */
+/* 日付／月切替バー       */
+/* ===================== */
+
 .adm-att__toolbar {
     width: 100%;
     display: grid;
     grid-template-columns: 140px 1fr 140px;
     align-items: center;
-    background: #fff;
     padding: 16px 28px;
-    border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
     margin-bottom: 32px;
+    border-radius: 12px;
+    background: #fff;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
     font-size: 15px;
-    /* 文字大きめ */
 }
 
 .adm-att__nav {
@@ -72,34 +73,68 @@
     justify-content: flex-end;
 }
 
-/* 一覧カード全体 */
+/* ===================== */
+/* 一覧カード／テーブル   */
+/* ===================== */
+
 .adm-att__card {
-    background: #fff;
-    border-radius: 12px;
     padding: 4px 0;
+    border-radius: 12px;
+    background: #fff;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
-/* テーブル共通 */
+/* 基本レイアウト＋列幅揃え */
 .adm-att__table {
     width: 100%;
     border-collapse: collapse;
+    table-layout: fixed;
     font-size: 15px;
-    /* 全体的に大きめ */
 }
 
-/* ヘッダー行（背景色なし） */
+/* 列幅と揃え（1:日付 or 名前 / 2〜3:出勤退勤 / 4:休憩 / 5:合計 / 6:詳細） */
+.adm-att__table th:nth-child(1),
+.adm-att__table td:nth-child(1) {
+    width: 18%;
+    text-align: center;
+}
+
+.adm-att__table th:nth-child(2),
+.adm-att__table td:nth-child(2),
+.adm-att__table th:nth-child(3),
+.adm-att__table td:nth-child(3) {
+    width: 14%;
+    text-align: center;
+}
+
+.adm-att__table th:nth-child(4),
+.adm-att__table td:nth-child(4) {
+    width: 14%;
+    text-align: center;
+}
+
+.adm-att__table th:nth-child(5),
+.adm-att__table td:nth-child(5) {
+    width: 14%;
+    text-align: center;
+}
+
+.adm-att__table th:nth-child(6),
+.adm-att__table td:nth-child(6) {
+    width: 12%;
+    text-align: center;
+}
+
+/* ヘッダー行 */
 .adm-att__table thead tr {
     background: #fff;
-    /* 参考画像通り「色なし」 */
 }
 
 .adm-att__table th {
+    padding: 14px 24px;
+    border-bottom: 1px solid #dcdcdc;
     font-weight: 700;
     color: #333;
-    padding: 14px 24px;
-    /* 少し高さを出す */
-    border-bottom: 1px solid #dcdcdc;
 }
 
 /* データ行 */
@@ -108,12 +143,21 @@
     border-bottom: 1px solid #e5e5e5;
 }
 
+/* 1列目だけ左揃えにしたい場合（名前カラムなど） */
 .adm-att__cell-name {
     text-align: left;
     font-weight: 500;
 }
 
-/* 詳細リンク：太字・下線なし・黒 */
+/* 「データなし」行 */
+.adm-att__empty {
+    padding: 32px 0;
+    font-size: 15px;
+    color: #666;
+    text-align: center;
+}
+
+/* 詳細リンク */
 .adm-att__detail-link {
     font-size: 15px;
     font-weight: 700;
@@ -132,15 +176,51 @@
     text-decoration: none;
 }
 
-/* データなし */
-.adm-att__empty {
-    padding: 32px 0;
-    font-size: 15px;
-    color: #666;
-    text-align: center;
+/* ===================== */
+/* CSV 出力ボタン         */
+/* ===================== */
+
+.adm-att__csv {
+    margin-top: 16px;
+    display: flex;
+    justify-content: flex-end;
 }
 
-/* スマホ向け */
+.adm-att__csv-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 120px;
+    height: 32px;
+    padding: 0 24px;
+    border-radius: 4px;
+    background: #000;
+    color: #fff;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-decoration: none;
+}
+
+.adm-att__csv-btn:hover {
+    opacity: 0.85;
+}
+
+/* ===================== */
+/* その他（詳細画面用）   */
+/* ===================== */
+
+.adm-attd-dtl__submit--done {
+    background: #777;
+    border-color: #777;
+    cursor: default;
+    pointer-events: none;
+}
+
+/* ===================== */
+/* スマホ向け調整         */
+/* ===================== */
+
 @media (max-width: 768px) {
     .adm-att__inner {
         width: calc(100% - 32px);
@@ -149,8 +229,8 @@
     .adm-att__toolbar {
         grid-template-columns: 1fr;
         row-gap: 10px;
-        text-align: center;
         padding: 12px 18px;
+        text-align: center;
         font-size: 14px;
     }
 

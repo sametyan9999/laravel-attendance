@@ -1,0 +1,82 @@
+/* ========== メール認証誘導画面 ========== */
+
+.verify {
+    padding: 120px 16px 80px;
+    background-color: #f5f4f1;
+    min-height: calc(100vh - 56px);
+    /* ヘッダー分をざっくり差し引き */
+    box-sizing: border-box;
+}
+
+.verify__inner {
+    max-width: 640px;
+    margin: 0 auto;
+    text-align: center;
+}
+
+/* メインメッセージ */
+.verify__message {
+    font-size: 18px;
+    line-height: 1.8;
+    margin: 0 0 48px;
+}
+
+/* 大きいボタン */
+.verify__button-wrapper {
+    margin-bottom: 32px;
+}
+
+.verify__button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 260px;
+    padding: 16px 40px;
+    border-radius: 4px;
+    border: 1px solid #333;
+    background-color: #e5e5e5;
+    font-size: 18px;
+    font-weight: 700;
+    text-decoration: none;
+    color: #000;
+    cursor: pointer;
+}
+
+.verify__button:hover {
+    filter: brightness(0.97);
+}
+
+/* 再送リンク（テキストのみ） */
+.verify__resend-form {
+    margin-top: 8px;
+}
+
+.verify__resend-link {
+    border: none;
+    background: none;
+    padding: 0;
+    font: inherit;
+    color: #1d4ed8;
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.verify__resend-link:hover {
+    text-decoration: none;
+}
+
+/* モバイル対応 */
+@media (max-width: 767px) {
+    .verify {
+        padding-top: 96px;
+    }
+
+    .verify__message {
+        font-size: 16px;
+    }
+
+    .verify__button {
+        width: 80%;
+        min-width: 0;
+    }
+}
