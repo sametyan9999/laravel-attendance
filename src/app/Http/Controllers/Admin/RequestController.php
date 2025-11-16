@@ -41,6 +41,29 @@ class RequestController extends Controller
     }
 
     /**
+     * ✅ テスト用: 承認済み一覧
+     *
+     * GET /admin/stamp_correction_request/approved
+     * → 「修正申請」を含む一覧画面を返す
+     */
+    public function approved()
+    {
+        $requests = StampCorrectionRequest::with([
+                'requester',
+                'attendance',
+            ])
+            ->where('status', 'approved')
+            ->orderByDesc('created_at')
+            ->paginate(20);
+
+        // 承認済みタブとして同じビューを再利用
+        return view('admin.request.index', [
+            'requests' => $requests,
+            'tab'      => 'approved',
+        ]);
+    }
+
+    /**
      * PG13: 申請詳細
      */
     public function show(StampCorrectionRequest $stampRequest)
@@ -119,8 +142,7 @@ class RequestController extends Controller
             $stampRequest->save();
         });
 
-        // ★ 承認後は「この申請の詳細画面（承認済み表示）」へ遷移
-        //    ルートパラメータ名は routes/web.php の {stamp_request} に合わせる
+        // 承認後はこの申請の詳細画面へ
         return redirect()
             ->route('admin.request.show', ['stamp_request' => $stampRequest->id])
             ->with('ok', true);

@@ -20,7 +20,7 @@
       @php
         $label = [
           'off_duty'  => '勤務外',
-          'working'   => '勤務中',
+          'working'   => '出勤中',
           'break'     => '休憩中',
           'completed' => '退勤済'
         ][$attendance->status] ?? '勤務外';

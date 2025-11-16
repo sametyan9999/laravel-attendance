@@ -31,8 +31,8 @@ class CreateNewUser implements CreatesNewUsers
             'password' => $this->passwordRules(),
         ], [
             // ▼ ここから日本語エラーメッセージ
-            'name.required'      => '名前を入力してください',
-            'name.string'        => '名前を正しく入力してください',
+            'name.required'      => 'お名前を入力してください',
+            'name.string'        => 'お名前を正しく入力してください',
             'name.max'           => '名前は255文字以内で入力してください',
 
             'email.required'     => 'メールアドレスを入力してください',

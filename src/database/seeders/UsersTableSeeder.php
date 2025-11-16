@@ -10,28 +10,16 @@ class UsersTableSeeder extends Seeder
 {
     public function run(): void
     {
+        // ★ migrate:fresh 後はテーブルが空なので truncate 不要
+        // DB::table('users')->truncate(); ← これは削除してOK
+
         DB::table('users')->insert([
             [
-                'name' => 'Admin User',
-                'email' => 'admin@example.com',
-                'password' => Hash::make('password'),
-                'role' => 'admin',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'name' => 'Staff A',
-                'email' => 'staff-a@example.com',
-                'password' => Hash::make('password'),
-                'role' => 'user',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'name' => 'Staff B',
-                'email' => 'staff-b@example.com',
-                'password' => Hash::make('password'),
-                'role' => 'user',
+                'name'       => 'Admin User',
+                'email'      => 'admin@example.com',
+                // 管理者ログイン用パスワード（テスト仕様に合わせて変えてもOK）
+                'password'   => Hash::make('Admin1234'),
+                'role'       => 'admin',
                 'created_at' => now(),
                 'updated_at' => now(),
             ],

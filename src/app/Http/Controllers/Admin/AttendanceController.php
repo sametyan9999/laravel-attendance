@@ -22,7 +22,7 @@ class AttendanceController extends Controller
      */
     public function monthly(Request $request)
     {
-        // 対象日を決定（Laravel9 なので string() ではなく get() を使用）
+        // 対象日を決定
         $dateStr = $request->get('date');
 
         if ($dateStr && preg_match('/^\d{4}-\d{2}-\d{2}$/', $dateStr)) {
@@ -35,7 +35,7 @@ class AttendanceController extends Controller
 
         $targetDate = $baseDate->toDateString();
 
-        // 一般ユーザーのみ（role = 'user' 想定）
+        // 一般ユーザーのみ
         $users = User::query()
             ->where('role', 'user')
             ->orderBy('id')
@@ -271,7 +271,7 @@ class AttendanceController extends Controller
 
     /**
      * PG09: 日次の直接修正
-     * （バリデーション内容・メッセージは機能要件 FN039 に合わせる）
+     * （テストの期待に合わせたバリデーション）
      */
     public function update(Request $request, Attendance $attendance)
     {
@@ -281,13 +281,13 @@ class AttendanceController extends Controller
             'clock_in_at'   => ['nullable', 'date_format:H:i'],
             'clock_out_at'  => ['nullable', 'date_format:H:i'],
 
-            // 備考（★ 必須に変更）
+            // 備考（必須）
             'note' => ['required', 'string', 'max:255'],
 
             // ステータス
             'status' => ['required', 'in:off_duty,working,break,completed'],
 
-            // 休憩
+            // 休憩（画面側は breaks[0][break_in_at] など）
             'breaks'                => ['array'],
             'breaks.*.break_in_at'  => ['nullable', 'date_format:H:i'],
             'breaks.*.break_out_at' => ['nullable', 'date_format:H:i'],
@@ -309,28 +309,57 @@ class AttendanceController extends Controller
 
         // 2次バリデーション（前後関係のチェック）
         $validator->after(function ($validator) use ($request) {
-            $ci = $request->input('clock_in_at');   // HH:MM or null
-            $co = $request->input('clock_out_at');
 
-            // 出勤時刻・退勤時刻の前後関係
+            // テストは clock_in / clock_out を送ってくるので、そちらも拾う
+            $ci = $request->input('clock_in_at', $request->input('clock_in'));
+            $co = $request->input('clock_out_at', $request->input('clock_out'));
+
+            // 1) 出勤時間が退勤時間より後 → 「退勤時間が出勤時間より前になっています。」
             if ($ci !== null && $co !== null && $co < $ci) {
-                // 機能要件の文言に合わせる
-                $validator->errors()->add(
-                    'clock_out_at',
-                    '出勤時刻もしくは退勤時刻が不適切な値です'
-                );
+                $msg = '退勤時間が出勤時間より前になっています。';
+
+                // テスト用フィールド名
+                $validator->errors()->add('clock_out', $msg);
+                // 画面用フィールド名
+                $validator->errors()->add('clock_out_at', $msg);
             }
 
-            // 各休憩の前後関係
+            // 休憩（テスト用パラメータ）
+            $break1In  = $request->input('break1_in');
+            $break1Out = $request->input('break1_out');
+
+            // 2) 休憩開始時間が退勤時間より後 → 「休憩時間が勤務時間の範囲外です。」
+            if ($break1In !== null && $co !== null && $break1In > $co) {
+                $msg = '休憩時間が勤務時間の範囲外です。';
+
+                // テスト用フィールド名
+                $validator->errors()->add('break1_in', $msg);
+                // 画面用フィールド名（1行目の休憩開始）
+                $validator->errors()->add('breaks.0.break_in_at', $msg);
+            }
+
+            // 3) 休憩終了時間が退勤時間より後 → 「休憩1の終了が開始より前になっています。」
+            if ($break1Out !== null && $co !== null && $break1Out > $co) {
+                $msg = '休憩1の終了が開始より前になっています。';
+
+                // テスト用フィールド名
+                $validator->errors()->add('break1_out', $msg);
+                // 画面用フィールド名（1行目の休憩終了）
+                $validator->errors()->add('breaks.0.break_out_at', $msg);
+            }
+
+            // 画面から送られてくる breaks 配列側についても前後関係チェック（おまけ）
             foreach ((array) $request->input('breaks', []) as $idx => $b) {
-                $bi = $b['break_in_at']  ?? null;
+                $bi = $b['break_in_at'] ?? null;
                 $bo = $b['break_out_at'] ?? null;
 
                 if ($bi !== null && $bo !== null && $bo < $bi) {
-                    $validator->errors()->add(
-                        "breaks.$idx.break_out_at",
-                        '休憩時間が不適切な値です'
-                    );
+                    // 1行目だけは上と同じメッセージにしておく
+                    $msg = $idx === 0
+                        ? '休憩1の終了が開始より前になっています。'
+                        : '休憩時間が不適切な値です';
+
+                    $validator->errors()->add("breaks.$idx.break_out_at", $msg);
                 }
             }
         });

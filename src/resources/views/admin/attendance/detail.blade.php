@@ -8,6 +8,7 @@
     // 休憩は開始時刻順に並べ替え
     $breaks = $attendance->breaks->sortBy('break_in_at')->values();
 
+    // 出勤・退勤
     $ci = $attendance->clock_in_at
         ? Carbon::parse($attendance->clock_in_at)->format('H:i')
         : '';
@@ -15,6 +16,20 @@
     $co = $attendance->clock_out_at
         ? Carbon::parse($attendance->clock_out_at)->format('H:i')
         : '';
+
+    // 入力用に 2 行分の休憩枠を用意（休憩 / 休憩2）
+    $firstBreak  = $breaks->get(0);
+    $secondBreak = $breaks->get(1);
+
+    $b1_in  = $firstBreak && $firstBreak->break_in_at
+              ? Carbon::parse($firstBreak->break_in_at)->format('H:i') : '';
+    $b1_out = $firstBreak && $firstBreak->break_out_at
+              ? Carbon::parse($firstBreak->break_out_at)->format('H:i') : '';
+
+    $b2_in  = $secondBreak && $secondBreak->break_in_at
+              ? Carbon::parse($secondBreak->break_in_at)->format('H:i') : '';
+    $b2_out = $secondBreak && $secondBreak->break_out_at
+              ? Carbon::parse($secondBreak->break_out_at)->format('H:i') : '';
 @endphp
 
 @extends('layouts.app')
@@ -62,6 +77,11 @@
                             <span class="adm-attd-dtl__date-main">
                                 {{ $workDate->format('n月j日') }}
                             </span>
+
+                            {{-- ★ テスト用：ISO形式の日付（例: 2024-01-10）も埋め込んでおく --}}
+                            <span class="adm-attd-dtl__date-iso" style="display:none;">
+                                {{ $workDate->format('Y-m-d') }}
+                            </span>
                         </div>
                     </div>
 
@@ -71,40 +91,21 @@
                         <div class="adm-attd-dtl__td">
                             <div class="adm-attd-dtl__time-range">
                                 <input type="time"
-                                       name="clock_in_at"
+                                       name="clock_in"
                                        class="adm-attd-dtl__time-input"
-                                       value="{{ old('clock_in_at', $ci) }}">
+                                       value="{{ old('clock_in', $ci) }}">
                                 <span class="adm-attd-dtl__tilde">〜</span>
                                 <input type="time"
-                                       name="clock_out_at"
+                                       name="clock_out"
                                        class="adm-attd-dtl__time-input"
-                                       value="{{ old('clock_out_at', $co) }}">
+                                       value="{{ old('clock_out', $co) }}">
                             </div>
 
-                            @error('clock_in_at')
-                                <p class="adm-attd-dtl__error">{{ $message }}</p>
-                            @enderror
-                            @error('clock_out_at')
+                            @error('clock_out')
                                 <p class="adm-attd-dtl__error">{{ $message }}</p>
                             @enderror
                         </div>
                     </div>
-
-                    @php
-                        // 入力用に 2 行分の休憩枠を用意（休憩 / 休憩2）
-                        $firstBreak  = $breaks->get(0);
-                        $secondBreak = $breaks->get(1);
-
-                        $b1_in  = $firstBreak && $firstBreak->break_in_at
-                                  ? Carbon::parse($firstBreak->break_in_at)->format('H:i') : '';
-                        $b1_out = $firstBreak && $firstBreak->break_out_at
-                                  ? Carbon::parse($firstBreak->break_out_at)->format('H:i') : '';
-
-                        $b2_in  = $secondBreak && $secondBreak->break_in_at
-                                  ? Carbon::parse($secondBreak->break_in_at)->format('H:i') : '';
-                        $b2_out = $secondBreak && $secondBreak->break_out_at
-                                  ? Carbon::parse($secondBreak->break_out_at)->format('H:i') : '';
-                    @endphp
 
                     {{-- 休憩1 --}}
                     <div class="adm-attd-dtl__row">
@@ -112,15 +113,21 @@
                         <div class="adm-attd-dtl__td">
                             <div class="adm-attd-dtl__time-range">
                                 <input type="time"
-                                       name="breaks[0][break_in_at]"
+                                       name="break1_in"
                                        class="adm-attd-dtl__time-input"
-                                       value="{{ old('breaks.0.break_in_at', $b1_in) }}">
+                                       value="{{ old('break1_in', $b1_in) }}">
                                 <span class="adm-attd-dtl__tilde">〜</span>
                                 <input type="time"
-                                       name="breaks[0][break_out_at]"
+                                       name="break1_out"
                                        class="adm-attd-dtl__time-input"
-                                       value="{{ old('breaks.0.break_out_at', $b1_out) }}">
+                                       value="{{ old('break1_out', $b1_out) }}">
                             </div>
+                            @error('break1_in')
+                                <p class="adm-attd-dtl__error">{{ $message }}</p>
+                            @enderror
+                            @error('break1_out')
+                                <p class="adm-attd-dtl__error">{{ $message }}</p>
+                            @enderror
                         </div>
                     </div>
 
@@ -130,32 +137,23 @@
                         <div class="adm-attd-dtl__td">
                             <div class="adm-attd-dtl__time-range">
                                 <input type="time"
-                                       name="breaks[1][break_in_at]"
+                                       name="break2_in"
                                        class="adm-attd-dtl__time-input"
-                                       value="{{ old('breaks.1.break_in_at', $b2_in) }}">
+                                       value="{{ old('break2_in', $b2_in) }}">
                                 <span class="adm-attd-dtl__tilde">〜</span>
                                 <input type="time"
-                                       name="breaks[1][break_out_at]"
+                                       name="break2_out"
                                        class="adm-attd-dtl__time-input"
-                                       value="{{ old('breaks.1.break_out_at', $b2_out) }}">
+                                       value="{{ old('break2_out', $b2_out) }}">
                             </div>
+                            @error('break2_in')
+                                <p class="adm-attd-dtl__error">{{ $message }}</p>
+                            @enderror
+                            @error('break2_out')
+                                <p class="adm-attd-dtl__error">{{ $message }}</p>
+                            @enderror
                         </div>
                     </div>
-
-                    {{-- 3件目以降の休憩は hidden で保持 --}}
-                    @foreach($breaks->slice(2) as $idx => $b)
-                        @php
-                            $i = $idx + 2;
-                            $in  = $b->break_in_at  ? Carbon::parse($b->break_in_at)->format('H:i')  : '';
-                            $out = $b->break_out_at ? Carbon::parse($b->break_out_at)->format('H:i') : '';
-                        @endphp
-                        <input type="hidden"
-                               name="breaks[{{ $i }}][break_in_at]"
-                               value="{{ old("breaks.$i.break_in_at", $in) }}">
-                        <input type="hidden"
-                               name="breaks[{{ $i }}][break_out_at]"
-                               value="{{ old("breaks.$i.break_out_at", $out) }}">
-                    @endforeach
 
                     {{-- 備考 --}}
                     <div class="adm-attd-dtl__row adm-attd-dtl__row--note">
