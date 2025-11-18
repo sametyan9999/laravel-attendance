@@ -1,7 +1,7 @@
 services:
   nginx:
     image: nginx:1.21.1
-    # platform: linux/amd64   # ← 必要なら付与
+    # platform: linux/amd64
     ports:
       - "80:80"
     volumes:
@@ -25,7 +25,7 @@ services:
       MYSQL_PASSWORD: laravel_pass
     command: mysqld --default-authentication-plugin=mysql_native_password
     volumes:
-      - ./docker/mysql/data:/var/lib/mysql
+      - attendance-db:/var/lib/mysql
       - ./docker/mysql/my.cnf:/etc/mysql/conf.d/my.cnf
 
   phpmyadmin:
@@ -44,5 +44,8 @@ services:
     image: mailhog/mailhog
     container_name: mailhog
     ports:
-      - "8025:8025"   # Web UI (http://localhost:8025)
-      - "1025:1025"   # SMTP server
+      - "8025:8025"
+      - "1025:1025"
+
+volumes:
+  attendance-db:

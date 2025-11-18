@@ -3,12 +3,15 @@
 use Illuminate\Support\Facades\Route;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 
 use App\Http\Controllers\Front\AttendanceRecordController as FAttendance;
 use App\Http\Controllers\Front\RequestController as FRequest;
 use App\Http\Controllers\Admin\AttendanceController as AAttendance;
 use App\Http\Controllers\Admin\RequestController as ARequest;
 use App\Http\Requests\AdminLoginRequest; // ★ 管理者ログイン用 FormRequest
+use App\Models\User;
 
 /*
 |--------------------------------------------------------------------------
@@ -33,7 +36,7 @@ Route::middleware('guest')->group(function () {
         return view('admin.auth.login');
     })->name('admin.login.form');
 
-    // ★ FormRequest を使った管理者ログイン
+    // ★ FormRequest + 認証（usersテーブルの admin ユーザー）
     Route::post('/admin/login', function (AdminLoginRequest $request) {
 
         // この時点で AdminLoginRequest によるバリデーションは完了
@@ -42,14 +45,22 @@ Route::middleware('guest')->group(function () {
         $email    = $validated['email'];
         $password = $validated['password'];
 
-        $validEmail    = 'admin@example.com';
-        $validPassword = 'Admin1234';
+        // usersテーブルからメールアドレス一致のユーザーを取得
+        $user = User::where('email', $email)->first();
 
-        if ($email !== $validEmail || $password !== $validPassword) {
+        // ユーザーが存在しない / パスワード不一致 / role が admin でない → 認証エラー
+        if (
+            !$user ||
+            !Hash::check($password, $user->password) ||
+            $user->role !== 'admin'
+        ) {
             return back()
                 ->withErrors(['email' => 'ログイン情報が登録されていません'])
                 ->withInput();
         }
+
+        // 認証成功 → セッションにログイン状態を保存
+        Auth::login($user);
 
         return redirect()->route('admin.attendance.list');
     })->name('admin.login');
@@ -122,7 +133,7 @@ Route::prefix('admin')
 
         /*
         |--------------------------------------------------------------------------
-        | PG13: 申請詳細（テストの route() に合わせた URL パラメータ名）
+        | PG13: 申請詳細
         |--------------------------------------------------------------------------
         | GET /admin/stamp_correction_request/approve/{attendance_correct_request_id}
         | → RequestController@show
@@ -140,7 +151,6 @@ Route::prefix('admin')
         |--------------------------------------------------------------------------
         | POST /admin/stamp_correction_request/{attendance_correct_request_id}/approve
         | → RequestController@approve
-        | （テストでこのパスを直接叩いている）
         */
         Route::post(
             '/stamp_correction_request/{attendance_correct_request_id}/approve',
@@ -149,7 +159,7 @@ Route::prefix('admin')
             ->whereNumber('attendance_correct_request_id')
             ->name('request.approve');
 
-        // 却下処理（reject は任意）
+        // 却下処理
         Route::post(
             '/stamp_correction_request/{stamp_request}/reject',
             [ARequest::class, 'reject']

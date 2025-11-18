@@ -6,10 +6,13 @@ use App\Http\Requests\Auth\RegisterRequest;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 use Laravel\Fortify\Contracts\CreatesNewUsers;
 
 class CreateNewUser implements CreatesNewUsers
 {
+    use PasswordValidationRules;
+
     /**
      * Validate and create a newly registered user.
      *
@@ -17,13 +20,14 @@ class CreateNewUser implements CreatesNewUsers
      */
     public function create(array $input): User
     {
-        // RegisterRequest にまとめたルール・メッセージを利用
-        $formRequest = new RegisterRequest();
+        // ★ RegisterRequest(FormRequest) に集約したルール／メッセージを利用
+        /** @var RegisterRequest $form */
+        $form = app(RegisterRequest::class);
 
         Validator::make(
             $input,
-            $formRequest->rules(),
-            $formRequest->messages()
+            $form->rules(),
+            $form->messages()
         )->validate();
 
         return User::create([
