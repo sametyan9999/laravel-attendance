@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Front;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\AttendanceCorrectionRequest;
 use App\Models\Attendance;
 use App\Models\AttendanceBreak;
 use App\Models\StampCorrectionRequest;
@@ -198,7 +199,7 @@ class AttendanceRecordController extends Controller
     }
 
     /** PG05: 日次詳細（更新＝修正申請の作成） */
-    public function update(Request $request, Attendance $attendance)
+    public function update(AttendanceCorrectionRequest $request, Attendance $attendance)
     {
         if ($attendance->user_id !== Auth::id()) {
             abort(403);
@@ -211,26 +212,8 @@ class AttendanceRecordController extends Controller
             return back()->withErrors(['pending' => '承認待ちのため修正はできません。'])->withInput();
         }
 
-        // ★ メッセージ（備考以外は validateTimeRelations() で上書き）
-        $messages = [
-            'clock_in.date_format'   => '出勤時刻は「HH:MM」形式で入力してください。',
-            'clock_out.date_format'  => '退勤時刻は「HH:MM」形式で入力してください。',
-            'break1_in.date_format'  => '休憩1の開始時刻は「HH:MM」形式で入力してください。',
-            'break1_out.date_format' => '休憩1の終了時刻は「HH:MM」形式で入力してください。',
-            'break2_in.date_format'  => '休憩2の開始時刻は「HH:MM」形式で入力してください。',
-            'break2_out.date_format' => '休憩2の終了時刻は「HH:MM」形式で入力してください。',
-            'note.required'          => '備考を記入してください',
-        ];
-
-        $validated = $request->validate([
-            'clock_in'   => ['nullable', 'date_format:H:i'],
-            'clock_out'  => ['nullable', 'date_format:H:i'],
-            'break1_in'  => ['nullable', 'date_format:H:i'],
-            'break1_out' => ['nullable', 'date_format:H:i'],
-            'break2_in'  => ['nullable', 'date_format:H:i'],
-            'break2_out' => ['nullable', 'date_format:H:i'],
-            'note'       => ['required', 'string', 'max:255'],
-        ], $messages);
+        // ★ FormRequest でバリデーション済み
+        $validated = $request->validated();
 
         // ★ ユーザー要件に合わせた相関バリデーション
         $this->validateTimeRelations($attendance->work_date, $validated);

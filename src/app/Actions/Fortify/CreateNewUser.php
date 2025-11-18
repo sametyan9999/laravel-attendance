@@ -2,16 +2,14 @@
 
 namespace App\Actions\Fortify;
 
+use App\Http\Requests\Auth\RegisterRequest;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\Rule;
 use Laravel\Fortify\Contracts\CreatesNewUsers;
 
 class CreateNewUser implements CreatesNewUsers
 {
-    use PasswordValidationRules;
-
     /**
      * Validate and create a newly registered user.
      *
@@ -19,31 +17,14 @@ class CreateNewUser implements CreatesNewUsers
      */
     public function create(array $input): User
     {
-        Validator::make($input, [
-            'name' => ['required', 'string', 'max:255'],
-            'email' => [
-                'required',
-                'string',
-                'email',
-                'max:255',
-                Rule::unique(User::class),
-            ],
-            'password' => $this->passwordRules(),
-        ], [
-            // ▼ ここから日本語エラーメッセージ
-            'name.required'      => 'お名前を入力してください',
-            'name.string'        => 'お名前を正しく入力してください',
-            'name.max'           => '名前は255文字以内で入力してください',
+        // RegisterRequest にまとめたルール・メッセージを利用
+        $formRequest = new RegisterRequest();
 
-            'email.required'     => 'メールアドレスを入力してください',
-            'email.email'        => 'メールアドレスの形式が不適切です',
-            'email.max'          => 'メールアドレスは255文字以内で入力してください',
-            'email.unique'       => 'このメールアドレスは既に登録されています',
-
-            'password.required'  => 'パスワードを入力してください',
-            'password.min'       => 'パスワードは8文字以上で入力してください',
-            'password.confirmed' => 'パスワードが一致しません',
-        ])->validate();
+        Validator::make(
+            $input,
+            $formRequest->rules(),
+            $formRequest->messages()
+        )->validate();
 
         return User::create([
             'name'     => $input['name'],

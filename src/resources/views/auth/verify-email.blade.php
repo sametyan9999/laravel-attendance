@@ -27,7 +27,12 @@
         認証はこちらから
       </a>
     </div>
-
+{{-- ★ 再送後の成功メッセージ --}}
+@if (session('status') === 'verification-link-sent')
+  <p class="verify__success">
+    認証メールを再送しました。メールをご確認ください。
+  </p>
+@endif
     {{-- 認証メール再送 --}}
     <form method="POST"
           action="{{ route('verification.send') }}"

@@ -88,7 +88,7 @@
 
             {{-- 詳細リンク --}}
             <td class="col-detail">
-              <a href="{{ route('admin.request.show', ['stamp_request' => $req->id]) }}"
+              <a href="{{ route('admin.request.show', ['attendance_correct_request_id' => $req->id]) }}"
                  class="adm-req__detail-link">
                 詳細
               </a>

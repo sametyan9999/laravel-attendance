@@ -80,3 +80,14 @@
         min-width: 0;
     }
 }
+
+.verify__success {
+    margin-bottom: 16px;
+    padding: 12px 16px;
+    border-radius: 6px;
+    background: #e6ffed;
+    color: #0f5132;
+    border: 1px solid #badbcc;
+    text-align: center;
+    font-size: 14px;
+}

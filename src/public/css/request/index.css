@@ -75,34 +75,46 @@
     font-weight: 700
 }
 
+/* ▼ th / td 共通 */
 .rq-table th,
 .rq-table td {
     padding: 16px 18px;
     border-bottom: 1px solid #EEE;
-    vertical-align: middle
+    vertical-align: middle;
 }
 
-.rq-table th:nth-child(1) {
+/* ▼ td の内容を中央揃え */
+.rq-table td {
+    text-align: center;
+}
+
+.rq-table th:nth-child(1),
+.rq-table td:nth-child(1) {
     width: 110px
 }
 
-.rq-table th:nth-child(2) {
+.rq-table th:nth-child(2),
+.rq-table td:nth-child(2) {
     width: 120px
 }
 
-.rq-table th:nth-child(3) {
+.rq-table th:nth-child(3),
+.rq-table td:nth-child(3) {
     width: 150px
 }
 
-.rq-table th:nth-child(4) {
+.rq-table th:nth-child(4),
+.rq-table td:nth-child(4) {
     min-width: 200px
 }
 
-.rq-table th:nth-child(5) {
+.rq-table th:nth-child(5),
+.rq-table td:nth-child(5) {
     width: 150px
 }
 
-.rq-table th:nth-child(6) {
+.rq-table th:nth-child(6),
+.rq-table td:nth-child(6) {
     width: 80px;
     text-align: center
 }
@@ -173,7 +185,9 @@
 
     .rq-table td {
         border: none;
-        padding: 6px 0
+        padding: 6px 0;
+        text-align: left;
+        /* スマホでは左揃えに戻す（見やすいため） */
     }
 
     .rq-table td[data-th]::before {

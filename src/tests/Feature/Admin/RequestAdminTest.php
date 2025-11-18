@@ -50,18 +50,18 @@ class RequestAdminTest extends TestCase
 
         // 承認待ち申請（2件）
         $pending1 = StampCorrectionRequest::factory()->create([
-            'attendance_id'      => $att1->id,
-            'requested_by'       => $user1->id,
-            'status'             => 'pending',
-            'requested_note'     => 'ユーザー1の申請',
+            'attendance_id'           => $att1->id,
+            'requested_by'            => $user1->id,
+            'status'                  => 'pending',
+            'requested_note'          => 'ユーザー1の申請',
             'requested_break_minutes' => 60,
         ]);
 
         $pending2 = StampCorrectionRequest::factory()->create([
-            'attendance_id'      => $att2->id,
-            'requested_by'       => $user2->id,
-            'status'             => 'pending',
-            'requested_note'     => 'ユーザー2の申請',
+            'attendance_id'           => $att2->id,
+            'requested_by'            => $user2->id,
+            'status'                  => 'pending',
+            'requested_note'          => 'ユーザー2の申請',
             'requested_break_minutes' => 30,
         ]);
 
@@ -154,9 +154,9 @@ class RequestAdminTest extends TestCase
         $admin = $this->createAdmin();
         $user  = $this->createUser('申請ユーザー');
 
-        $workDate   = Carbon::parse('2024-03-05');
-        $clockIn    = $workDate->copy()->setTime(9, 0);
-        $clockOut   = $workDate->copy()->setTime(18, 0);
+        $workDate = Carbon::parse('2024-03-05');
+        $clockIn  = $workDate->copy()->setTime(9, 0);
+        $clockOut = $workDate->copy()->setTime(18, 0);
 
         /** @var Attendance $attendance */
         $attendance = Attendance::factory()->for($user)->create([
@@ -177,7 +177,9 @@ class RequestAdminTest extends TestCase
         ]);
 
         $response = $this->actingAs($admin)
-            ->get(route('admin.request.show', ['stamp_request' => $request->id]));
+            ->get(route('admin.request.show', [
+                'attendance_correct_request_id' => $request->id,
+            ]));
 
         $response->assertStatus(200);
 
@@ -242,12 +244,18 @@ class RequestAdminTest extends TestCase
 
         // 承認ボタン押下（POST）
         $response = $this->actingAs($admin)
-            ->post(route('admin.request.approve', ['stamp_request' => $request->id]), [
+            ->post(route('admin.request.approve', [
+                'attendance_correct_request_id' => $request->id,
+            ]), [
                 'note' => '管理者メモ',
             ]);
 
         // 承認後は詳細画面へリダイレクトされる想定
-        $response->assertRedirect(route('admin.request.show', ['stamp_request' => $request->id]));
+        $response->assertRedirect(
+            route('admin.request.show', [
+                'attendance_correct_request_id' => $request->id,
+            ])
+        );
 
         // DB の状態を再取得
         $attendance->refresh();

@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\RequestApproveRequest;
+use App\Http\Requests\Admin\RequestRejectRequest;
 use App\Models\Attendance;
 use App\Models\StampCorrectionRequest;
 use Illuminate\Http\Request as HttpRequest;
@@ -65,11 +67,14 @@ class RequestController extends Controller
 
     /**
      * PG13: 申請詳細
+     *
+     * ルート定義:
+     * GET /admin/stamp_correction_request/approve/{attendance_correct_request_id}
      */
-    public function show(StampCorrectionRequest $stampRequest)
+    public function show(StampCorrectionRequest $attendance_correct_request_id)
     {
         // モデル側のリレーション名（requester / approver）に合わせる
-        $stampRequest->load([
+        $attendance_correct_request_id->load([
             'attendance.breaks',
             'attendance.user',
             'requester',
@@ -77,36 +82,41 @@ class RequestController extends Controller
         ]);
 
         // Blade では $req として扱う
-        return view('admin.request.show', ['req' => $stampRequest]);
+        return view('admin.request.show', ['req' => $attendance_correct_request_id]);
     }
 
     /**
-     * PG13: 承認（「修正」ボタン）
+     * PG13: 承認（「承認」ボタン）
+     *
+     * ルート定義:
+     * POST /admin/stamp_correction_request/{attendance_correct_request_id}/approve
+     *
+     * → RequestApproveRequest にバリデーションを移動
      */
-    public function approve(HttpRequest $http, StampCorrectionRequest $stampRequest)
+    public function approve(RequestApproveRequest $request, StampCorrectionRequest $attendance_correct_request_id)
     {
-        // 任意メモ（承認時の管理者メモ等）を受け取る場合
-        $data = $http->validate([
-            'note' => ['nullable', 'string', 'max:255'],
-        ]);
+        $data = $request->validated();
 
-        DB::transaction(function () use ($stampRequest, $data) {
+        DB::transaction(function () use ($attendance_correct_request_id, $data) {
             /** @var Attendance $attendance */
-            $attendance = $stampRequest->attendance()->lockForUpdate()->firstOrFail();
+            $attendance = $attendance_correct_request_id
+                ->attendance()
+                ->lockForUpdate()
+                ->firstOrFail();
 
             // 申請値が存在する項目のみ反映
-            if ($stampRequest->requested_clock_in_at !== null) {
-                $attendance->clock_in_at = $stampRequest->requested_clock_in_at;
+            if ($attendance_correct_request_id->requested_clock_in_at !== null) {
+                $attendance->clock_in_at = $attendance_correct_request_id->requested_clock_in_at;
             }
-            if ($stampRequest->requested_clock_out_at !== null) {
-                $attendance->clock_out_at = $stampRequest->requested_clock_out_at;
+            if ($attendance_correct_request_id->requested_clock_out_at !== null) {
+                $attendance->clock_out_at = $attendance_correct_request_id->requested_clock_out_at;
             }
 
-            if ($stampRequest->requested_break_minutes !== null) {
+            if ($attendance_correct_request_id->requested_break_minutes !== null) {
                 // 既存の休憩はクリアして、合計分のダミー1件で表現（集計を簡潔に）
                 $attendance->breaks()->delete();
 
-                $minutes = (int) $stampRequest->requested_break_minutes;
+                $minutes = (int) $attendance_correct_request_id->requested_break_minutes;
                 if ($minutes > 0) {
                     $in = $attendance->clock_in_at ?? now();
                     $out = $in->copy()->addMinutes($minutes);
@@ -136,27 +146,28 @@ class RequestController extends Controller
             $attendance->save();
 
             // 申請ステータス更新
-            $stampRequest->status      = 'approved';
-            $stampRequest->approved_by = Auth::id();
-            $stampRequest->approved_at = now();
-            $stampRequest->save();
+            $attendance_correct_request_id->status      = 'approved';
+            $attendance_correct_request_id->approved_by = Auth::id();
+            $attendance_correct_request_id->approved_at = now();
+            $attendance_correct_request_id->save();
         });
 
         // 承認後はこの申請の詳細画面へ
         return redirect()
-            ->route('admin.request.show', ['stamp_request' => $stampRequest->id])
+            ->route('admin.request.show', [
+                'attendance_correct_request_id' => $attendance_correct_request_id->id,
+            ])
             ->with('ok', true);
     }
 
     /**
      * PG13: 却下
+     *
+     * → RequestRejectRequest にバリデーションを移動
      */
-    public function reject(HttpRequest $http, StampCorrectionRequest $stampRequest)
+    public function reject(RequestRejectRequest $request, StampCorrectionRequest $stampRequest)
     {
-        // 却下理由を保存したい場合（任意）
-        $data = $http->validate([
-            'reason' => ['nullable', 'string', 'max:255'],
-        ]);
+        $data = $request->validated();
 
         DB::transaction(function () use ($stampRequest, $data) {
             $stampRequest->status      = 'rejected';

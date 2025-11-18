@@ -3,9 +3,9 @@
 namespace App\Http\Controllers\Front;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StampCorrectionStoreRequest;
 use App\Models\Attendance;
 use App\Models\StampCorrectionRequest;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class RequestController extends Controller
@@ -36,29 +36,10 @@ class RequestController extends Controller
     /**
      * 修正申請の登録（PG05のフォーム）
      */
-    public function store(Request $request)
+    public function store(StampCorrectionStoreRequest $request)
     {
-        // ★ エラーメッセージ定義（キーを requested_note → note に合わせる）
-        $messages = [
-            'attendance_id.required'          => '対象勤怠が不明です。',
-            'requested_clock_in_at.date'      => '出勤時刻が不適切な値です',
-            'requested_clock_out_at.date'     => '退勤時刻が不適切な値です',
-            'requested_clock_out_at.after_or_equal'
-                                              => '退勤時間は出勤時間以降に設定してください',
-            'requested_break_minutes.integer' => '休憩時間が不適切な値です',
-            'requested_break_minutes.min'     => '休憩時間が不適切な値です',
-            // ★ ここを note に統一
-            'note.required'                   => '備考を記入してください',
-        ];
-
-        // ★ バリデーションする項目も note に統一
-        $data = $request->validate([
-            'attendance_id'           => ['required', 'integer', 'exists:attendances,id'],
-            'requested_clock_in_at'   => ['nullable', 'date'],
-            'requested_clock_out_at'  => ['nullable', 'date', 'after_or_equal:requested_clock_in_at'],
-            'requested_break_minutes' => ['nullable', 'integer', 'min:0'],
-            'note'                    => ['required', 'string', 'max:255'], // ← 備考
-        ], $messages);
+        // ★ FormRequest でバリデーション済み
+        $data = $request->validated();
 
         // 本人の勤怠のみ対象（ポリシー未設定でも安全）
         $attendance = Attendance::whereKey($data['attendance_id'])

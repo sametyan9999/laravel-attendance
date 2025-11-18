@@ -8,6 +8,7 @@ use App\Http\Controllers\Front\AttendanceRecordController as FAttendance;
 use App\Http\Controllers\Front\RequestController as FRequest;
 use App\Http\Controllers\Admin\AttendanceController as AAttendance;
 use App\Http\Controllers\Admin\RequestController as ARequest;
+use App\Http\Requests\AdminLoginRequest; // ★ 管理者ログイン用 FormRequest
 
 /*
 |--------------------------------------------------------------------------
@@ -32,18 +33,11 @@ Route::middleware('guest')->group(function () {
         return view('admin.auth.login');
     })->name('admin.login.form');
 
-    Route::post('/admin/login', function (Request $request) {
+    // ★ FormRequest を使った管理者ログイン
+    Route::post('/admin/login', function (AdminLoginRequest $request) {
 
-        $messages = [
-            'email.required'    => 'メールアドレスを入力してください',
-            'email.email'       => 'メールアドレスの形式が不適切です',
-            'password.required' => 'パスワードを入力してください',
-        ];
-
-        $validated = $request->validate([
-            'email'    => ['required', 'email'],
-            'password' => ['required'],
-        ], $messages);
+        // この時点で AdminLoginRequest によるバリデーションは完了
+        $validated = $request->validated();
 
         $email    = $validated['email'];
         $password = $validated['password'];
@@ -122,19 +116,44 @@ Route::prefix('admin')
         Route::get('/stamp_correction_request/list', [ARequest::class, 'index'])
             ->name('request.index');
 
-        // ★ 承認済み一覧（追加）
+        // ★ 承認済み一覧（/admin/stamp_correction_request/approved）
         Route::get('/stamp_correction_request/approved', [ARequest::class, 'approved'])
             ->name('request.approved');
 
-        Route::get('/stamp_correction_request/{stamp_request}', [ARequest::class, 'show'])
-            ->whereNumber('stamp_request')
+        /*
+        |--------------------------------------------------------------------------
+        | PG13: 申請詳細（テストの route() に合わせた URL パラメータ名）
+        |--------------------------------------------------------------------------
+        | GET /admin/stamp_correction_request/approve/{attendance_correct_request_id}
+        | → RequestController@show
+        */
+        Route::get(
+            '/stamp_correction_request/approve/{attendance_correct_request_id}',
+            [ARequest::class, 'show']
+        )
+            ->whereNumber('attendance_correct_request_id')
             ->name('request.show');
 
-        Route::post('/stamp_correction_request/{stamp_request}/approve', [ARequest::class, 'approve'])
-            ->whereNumber('stamp_request')
+        /*
+        |--------------------------------------------------------------------------
+        | PG13: 承認処理
+        |--------------------------------------------------------------------------
+        | POST /admin/stamp_correction_request/{attendance_correct_request_id}/approve
+        | → RequestController@approve
+        | （テストでこのパスを直接叩いている）
+        */
+        Route::post(
+            '/stamp_correction_request/{attendance_correct_request_id}/approve',
+            [ARequest::class, 'approve']
+        )
+            ->whereNumber('attendance_correct_request_id')
             ->name('request.approve');
 
-        Route::post('/stamp_correction_request/{stamp_request}/reject', [ARequest::class, 'reject'])
+        // 却下処理（reject は任意）
+        Route::post(
+            '/stamp_correction_request/{stamp_request}/reject',
+            [ARequest::class, 'reject']
+        )
             ->whereNumber('stamp_request')
             ->name('request.reject');
     });
