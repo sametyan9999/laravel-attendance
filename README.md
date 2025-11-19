@@ -210,4 +210,40 @@ php artisan test
 
 ---
 
+## プロジェクト構成
+
+laravel-attendance/
+├─ docker-compose.yml           # Docker設定ファイル
+├─ README.md                    # このドキュメント
+└─ src/                         # Laravelアプリ本体（コンテナ内では /var/www）
+    ├─ app/                     # コントローラ / モデル / FormRequest / ポリシーなど
+    │   ├─ Http/
+    │   │   ├─ Controllers/     # 画面ごとのコントローラ
+    │   │   ├─ Middleware/
+    │   │   └─ Requests/        # FormRequest（バリデーション）
+    │   └─ Models/              # User / Attendance / AttendanceBreak / StampCorrectionRequest
+    ├─ bootstrap/
+    ├─ config/
+    ├─ database/
+    │   ├─ factories/           # テスト・シーディング用ファクトリ
+    │   ├─ migrations/          # users / attendances / attendance_breaks / stamp_correction_requests etc.
+    │   └─ seeders/             # AdminUserSeeder ほか各種シーダー
+    ├─ public/                  # ドキュメントルート (http://localhost/)
+    │   ├─ css/                 # 各画面ごとのCSS（admin / attendance / auth / request など）
+    │   ├─ images/              # ロゴ画像など
+    │   └─ index.php
+    ├─ resources/
+    │   ├─ js/                  # app.js / bootstrap.js
+    │   ├─ lang/                # 多言語ファイル（ja / en）
+    │   └─ views/               # Bladeテンプレート
+    ├─ routes/
+    │   └─ web.php              # Webルーティング定義
+    ├─ storage/                 # ログ / キャッシュ / アップロードファイル
+    ├─ tests/                   # PHPUnitテスト
+    ├─ .env                     # 環境設定ファイル（※Git管理外）
+    └─ artisan                  # Laravel CLI エントリポイント
+
+---
+
+
 © 2025 COACHTECH 勤怠管理アプリ

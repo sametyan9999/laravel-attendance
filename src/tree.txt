@@ -1,0 +1,314 @@
+.
+|-- app
+|   |-- Actions
+|   |   `-- Fortify
+|   |-- Console
+|   |   `-- Kernel.php
+|   |-- Exceptions
+|   |   `-- Handler.php
+|   |-- Http
+|   |   |-- Controllers
+|   |   |-- Kernel.php
+|   |   |-- Middleware
+|   |   |-- Requests
+|   |   `-- Responses
+|   |-- Models
+|   |   |-- Attendance.php
+|   |   |-- AttendanceBreak.php
+|   |   |-- StampCorrectionRequest.php
+|   |   `-- User.php
+|   |-- Policies
+|   |   `-- AttendancePolicy.php
+|   `-- Providers
+|       |-- AppServiceProvider.php
+|       |-- AuthServiceProvider.php
+|       |-- BroadcastServiceProvider.php
+|       |-- EventServiceProvider.php
+|       |-- FortifyServiceProvider.php
+|       `-- RouteServiceProvider.php
+|-- artisan
+|-- bootstrap
+|   |-- app.php
+|   `-- cache
+|       |-- packages.php
+|       `-- services.php
+|-- composer.json
+|-- composer.lock
+|-- config
+|   |-- app.php
+|   |-- auth.php
+|   |-- broadcasting.php
+|   |-- cache.php
+|   |-- cors.php
+|   |-- database.php
+|   |-- filesystems.php
+|   |-- fortify.php
+|   |-- hashing.php
+|   |-- logging.php
+|   |-- mail.php
+|   |-- queue.php
+|   |-- sanctum.php
+|   |-- services.php
+|   |-- session.php
+|   `-- view.php
+|-- database
+|   |-- factories
+|   |   |-- AttendanceBreakFactory.php
+|   |   |-- AttendanceFactory.php
+|   |   |-- StampCorrectionRequestFactory.php
+|   |   `-- UserFactory.php
+|   |-- migrations
+|   |   |-- 2014_10_12_000000_create_users_table.php
+|   |   |-- 2014_10_12_100000_create_password_resets_table.php
+|   |   |-- 2014_10_12_200000_add_two_factor_columns_to_users_table.php
+|   |   |-- 2019_08_19_000000_create_failed_jobs_table.php
+|   |   |-- 2019_12_14_000001_create_personal_access_tokens_table.php
+|   |   |-- 2025_11_11_132155_add_role_to_users_table.php
+|   |   |-- 2025_11_11_132159_create_attendances_table.php
+|   |   |-- 2025_11_11_132201_create_attendance_breaks_table.php
+|   |   `-- 2025_11_11_132202_create_stamp_correction_requests_table.php
+|   `-- seeders
+|       |-- AdminUserSeeder.php
+|       |-- AttendanceBreaksTableSeeder.php
+|       |-- AttendancesTableSeeder.php
+|       |-- DatabaseSeeder.php
+|       |-- StampCorrectionRequestsTableSeeder.php
+|       `-- UsersTableSeeder.php
+|-- package.json
+|-- phpunit.xml
+|-- public
+|   |-- css
+|   |   |-- admin
+|   |   |-- app.css
+|   |   |-- attendance
+|   |   |-- auth
+|   |   |-- header.css
+|   |   `-- request
+|   |-- favicon.ico
+|   |-- images
+|   |   `-- COACHTECHlogo.png
+|   |-- index.php
+|   `-- robots.txt
+|-- resources
+|   |-- css
+|   |-- js
+|   |   |-- app.js
+|   |   `-- bootstrap.js
+|   |-- lang
+|   |   |-- en
+|   |   `-- ja
+|   `-- views
+|       |-- admin
+|       |-- attendance
+|       |-- auth
+|       |-- components
+|       |-- layouts
+|       |-- request
+|       `-- welcome.blade.php
+|-- routes
+|   |-- api.php
+|   |-- channels.php
+|   |-- console.php
+|   `-- web.php
+|-- server.php
+|-- storage
+|   |-- app
+|   |   `-- public
+|   |-- framework
+|   |   |-- cache
+|   |   |-- sessions
+|   |   |-- testing
+|   |   `-- views
+|   `-- logs
+|       `-- laravel.log
+|-- tests
+|   |-- CreatesApplication.php
+|   |-- Feature
+|   |   |-- Admin
+|   |   |-- Attendance
+|   |   |-- Auth
+|   |   `-- ExampleTest.php
+|   |-- TestCase.php
+|   `-- Unit
+|       `-- ExampleTest.php
+|-- tree.txt
+|-- vendor
+|   |-- asm89
+|   |   `-- stack-cors
+|   |-- autoload.php
+|   |-- bacon
+|   |   `-- bacon-qr-code
+|   |-- bin
+|   |   |-- carbon
+|   |   |-- patch-type-declarations
+|   |   |-- php-parse
+|   |   |-- phpunit
+|   |   |-- psysh
+|   |   |-- sail
+|   |   |-- var-dump-server
+|   |   `-- yaml-lint
+|   |-- brick
+|   |   `-- math
+|   |-- carbonphp
+|   |   `-- carbon-doctrine-types
+|   |-- composer
+|   |   |-- ClassLoader.php
+|   |   |-- InstalledVersions.php
+|   |   |-- LICENSE
+|   |   |-- autoload_classmap.php
+|   |   |-- autoload_files.php
+|   |   |-- autoload_namespaces.php
+|   |   |-- autoload_psr4.php
+|   |   |-- autoload_real.php
+|   |   |-- autoload_static.php
+|   |   |-- installed.json
+|   |   |-- installed.php
+|   |   `-- platform_check.php
+|   |-- dasprid
+|   |   `-- enum
+|   |-- dflydev
+|   |   `-- dot-access-data
+|   |-- doctrine
+|   |   |-- inflector
+|   |   |-- instantiator
+|   |   `-- lexer
+|   |-- dragonmantank
+|   |   `-- cron-expression
+|   |-- egulias
+|   |   `-- email-validator
+|   |-- facade
+|   |   |-- flare-client-php
+|   |   |-- ignition
+|   |   `-- ignition-contracts
+|   |-- fakerphp
+|   |   `-- faker
+|   |-- filp
+|   |   `-- whoops
+|   |-- fruitcake
+|   |   `-- laravel-cors
+|   |-- graham-campbell
+|   |   `-- result-type
+|   |-- guzzlehttp
+|   |   |-- guzzle
+|   |   |-- promises
+|   |   `-- psr7
+|   |-- hamcrest
+|   |   `-- hamcrest-php
+|   |-- laravel
+|   |   |-- fortify
+|   |   |-- framework
+|   |   |-- sail
+|   |   |-- sanctum
+|   |   |-- serializable-closure
+|   |   `-- tinker
+|   |-- league
+|   |   |-- commonmark
+|   |   |-- config
+|   |   |-- flysystem
+|   |   `-- mime-type-detection
+|   |-- mockery
+|   |   `-- mockery
+|   |-- monolog
+|   |   `-- monolog
+|   |-- myclabs
+|   |   `-- deep-copy
+|   |-- nesbot
+|   |   `-- carbon
+|   |-- nette
+|   |   |-- schema
+|   |   `-- utils
+|   |-- nikic
+|   |   `-- php-parser
+|   |-- nunomaduro
+|   |   `-- collision
+|   |-- opis
+|   |   `-- closure
+|   |-- paragonie
+|   |   `-- constant_time_encoding
+|   |-- phar-io
+|   |   |-- manifest
+|   |   `-- version
+|   |-- phpoption
+|   |   `-- phpoption
+|   |-- phpunit
+|   |   |-- php-code-coverage
+|   |   |-- php-file-iterator
+|   |   |-- php-invoker
+|   |   |-- php-text-template
+|   |   |-- php-timer
+|   |   `-- phpunit
+|   |-- pragmarx
+|   |   `-- google2fa
+|   |-- psr
+|   |   |-- clock
+|   |   |-- container
+|   |   |-- event-dispatcher
+|   |   |-- http-client
+|   |   |-- http-factory
+|   |   |-- http-message
+|   |   |-- log
+|   |   `-- simple-cache
+|   |-- psy
+|   |   `-- psysh
+|   |-- ralouphie
+|   |   `-- getallheaders
+|   |-- ramsey
+|   |   |-- collection
+|   |   `-- uuid
+|   |-- sebastian
+|   |   |-- cli-parser
+|   |   |-- code-unit
+|   |   |-- code-unit-reverse-lookup
+|   |   |-- comparator
+|   |   |-- complexity
+|   |   |-- diff
+|   |   |-- environment
+|   |   |-- exporter
+|   |   |-- global-state
+|   |   |-- lines-of-code
+|   |   |-- object-enumerator
+|   |   |-- object-reflector
+|   |   |-- recursion-context
+|   |   |-- resource-operations
+|   |   |-- type
+|   |   `-- version
+|   |-- swiftmailer
+|   |   `-- swiftmailer
+|   |-- symfony
+|   |   |-- console
+|   |   |-- css-selector
+|   |   |-- deprecation-contracts
+|   |   |-- error-handler
+|   |   |-- event-dispatcher
+|   |   |-- event-dispatcher-contracts
+|   |   |-- finder
+|   |   |-- http-foundation
+|   |   |-- http-kernel
+|   |   |-- mime
+|   |   |-- polyfill-ctype
+|   |   |-- polyfill-iconv
+|   |   |-- polyfill-intl-grapheme
+|   |   |-- polyfill-intl-idn
+|   |   |-- polyfill-intl-normalizer
+|   |   |-- polyfill-mbstring
+|   |   |-- polyfill-php73
+|   |   |-- polyfill-php80
+|   |   |-- process
+|   |   |-- routing
+|   |   |-- service-contracts
+|   |   |-- string
+|   |   |-- translation
+|   |   |-- translation-contracts
+|   |   |-- var-dumper
+|   |   `-- yaml
+|   |-- theseer
+|   |   `-- tokenizer
+|   |-- tijsverkoyen
+|   |   `-- css-to-inline-styles
+|   |-- vlucas
+|   |   `-- phpdotenv
+|   `-- voku
+|       `-- portable-ascii
+`-- webpack.mix.js
+
+213 directories, 99 files
