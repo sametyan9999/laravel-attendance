@@ -8,15 +8,12 @@
 
 ## アプリケーション概要
 
-- サービス名：**COACHTECH 勤怠管理アプリ**
-- サービス概要：
-  - 一般ユーザー向け勤怠打刻・勤怠閲覧・修正申請機能
-  - 管理者向け勤怠一覧・スタッフ一覧・修正申請承認／却下機能
-- 制作目的：Laravel および Docker 環境での Web アプリ開発実践（勤怠管理ドメイン）
-- 対象ユーザー：
-  - 一般社員（出勤・退勤・休憩の記録、勤怠確認・修正申請を行うユーザー）
-  - 管理者ユーザー（スタッフの勤怠状況を把握し、修正申請の承認／却下を行うユーザー）
-- 使用環境：PC（Chrome / Firefox / Safari の最新バージョンを想定）
+| 項目 | 内容 |
+|------|------|
+| サービス名 | **COACHTECH 勤怠管理アプリ** |
+| 制作目的 | Laravel + Docker を用いた勤怠管理システムの開発 |
+| 想定ユーザー | 一般社員 / 管理者ユーザー |
+| 使用環境 | PC（Chrome / Firefox / Safari 最新版） |
 
 ---
 
@@ -24,41 +21,25 @@
 
 ### 一般ユーザー向け
 
-- ユーザー登録 / ログイン / ログアウト（Laravel Fortify 使用）
-- メールアドレス認証機能（メール認証誘導画面・認証メール再送機能）
-- 勤怠打刻機能
-  - 出勤 / 退勤
-  - 休憩開始 / 休憩終了（複数回）
-- 勤怠一覧機能
-  - 自分の月次勤怠一覧
-  - 日付切り替え（前月 / 翌月）
-- 勤怠詳細・修正申請機能
-  - 日別の勤怠詳細表示
-  - 出勤時刻・退勤時刻・休憩の編集
-  - 修正申請登録（管理者へ申請）
-- 申請一覧機能
-  - 自分が行った修正申請の「承認待ち／承認済み」一覧表示
+| 機能 | 内容 |
+|------|------|
+| ユーザー登録 / ログイン / ログアウト | Laravel Fortify 使用 |
+| メール認証 | MailHog を使用して認証 |
+| 勤怠打刻 | 出勤 / 退勤 / 休憩（複数回） |
+| 勤怠一覧 | 月別の勤怠一覧表示 |
+| 勤怠詳細・修正申請 | 日別詳細・修正申請登録 |
+| 申請一覧 | 自分の申請状況（承認待ち / 承認済み）表示 |
 
 ### 管理者向け
 
-- 管理者ログイン機能（Laravel Fortify 認証 + `role = admin` 判定）
-- スタッフ一覧機能
-  - 一般ユーザーの氏名・メールアドレス一覧表示
-- 日次勤怠一覧機能
-  - 指定日の全ユーザー勤怠一覧
-  - 詳細への遷移
-- 月次勤怠一覧（スタッフ別）
-  - スタッフごとの月次勤怠一覧
-  - CSV 出力機能（指定ユーザーの月次勤怠を CSV ダウンロード）
-- 勤怠詳細編集機能（管理者）
-  - 出勤・退勤・休憩時間の修正
-  - 備考・ステータス更新（off_duty / working / break / completed）
-  - 時刻の前後関係チェック（出勤 < 退勤、休憩が勤務時間内か など）
-- 修正申請一覧・詳細・承認／却下機能
-  - 承認待ち申請一覧
-  - 申請詳細表示
-  - 承認処理（勤怠レコード反映）
-  - 却下処理（却下理由の登録）
+| 機能 | 内容 |
+|------|------|
+| 管理者ログイン | Fortify認証 + `role = admin` 判定 |
+| スタッフ一覧 | 氏名・メールアドレス一覧表示 |
+| 日次勤怠一覧 | 指定日の全ユーザー勤怠 |
+| 月次勤怠一覧 | ユーザー別履歴・CSV出力 |
+| 勤怠詳細編集 | 出勤/退勤/休憩修正・備考 |
+| 修正申請詳細 | 承認／却下処理 |
 
 ---
 
@@ -73,8 +54,9 @@
 
 Seeder により以下の管理者ユーザーが作成されます。
 
-- メールアドレス：`admin@example.com`
-- パスワード：`Admin1234`
+| メールアドレス | パスワード |
+|----------------|------------|
+| `admin@example.com` | `Admin1234` |
 
 > ※ 管理者ユーザーには `role = admin` が付与されており、管理画面（勤怠一覧・修正申請一覧など）にアクセスできます。
 
@@ -92,9 +74,10 @@ Seeder により以下の管理者ユーザーが作成されます。
     composer install
     ```
 
-3. .env ファイルを作成
+3. .env作成 & APP_KEY生成
     ```bash
     cp .env.example .env
+    php artisan key:generate
     ```
 
 4. `.env` の設定を修正
@@ -148,20 +131,13 @@ FILESYSTEM_DRIVER=public
 
 ```
 
-5. アプリケーションキーを生成
+5. マイグレーション & シーディング
     ```bash
-    php artisan key:generate
+    php artisan migrate:fresh --seed
     ```
 
-6. マイグレーションを実行
-    ```bash
-    php artisan migrate
-    ```
+---
 
-7. シーディングを実行
-    ```bash
-    php artisan db:seed
-    ```
 ### Seeder 内容
 
 | Seeder名 | 内容 | 実行タイミング |
@@ -172,7 +148,7 @@ FILESYSTEM_DRIVER=public
 | AttendanceBreaksTableSeeder | 画面確認用の休憩データを作成 | 必要に応じて手動実行 |
 | StampCorrectionRequestsTableSeeder | 画面確認用の修正申請データを作成 | 必要に応じて手動実行 |
 
-#### 📌 手動実行例（必要な場合のみ）
+#### 手動実行例（必要な場合のみ）
 
 ```bash
 # 一般ユーザーだけ流す
@@ -192,40 +168,30 @@ docker compose exec php bash
 php artisan test
 ```
 ## 使用技術(実行環境)
-分類
-技術
-言語
-PHP 8.1
-フレームワーク
-Laravel 8.x
-認証
-Laravel Fortify / Laravel Sanctum
-DB
-MySQL 8.4
-フロント
-Blade / jQuery 3.7
-インフラ
-Docker / Docker Compose
-管理ツール
-phpMyAdmin / MailHog
-テスト
-PHPUnit 9.5
-バージョン管理
-Git / GitHub
+| 分類 | 使用技術 |
+|------|-------------------------------|
+| 言語 | PHP 8.1 |
+| フレームワーク | Laravel 8.x |
+| 認証 | Laravel Fortify / Laravel Sanctum |
+| DB | MySQL 8.4 |
+| フロント | Blade / jQuery 3.7 |
+| インフラ | Docker / Docker Compose |
+| 開発ツール | phpMyAdmin / MailHog |
+| テスト | PHPUnit 9.5 |
+| バージョン管理 | Git / GitHub |
 
 ## ER図
 ![alt text](ER.png)
 
 ## アプリケーションURL
-ページ
-URL
-ユーザー登録
-http://localhost/register
-一般ログイン
-http://localhost/login
-管理者ログイン
-http://localhost/admin/login
-MailHog
-http://localhost:8025
-phpMyAdmin
-http://localhost:8080
+| ページ | URL |
+|--------|------------------------------|
+| ユーザー登録 | http://localhost/register |
+| 一般ログイン | http://localhost/login |
+| 管理者ログイン | http://localhost/admin/login |
+| MailHog | http://localhost:8025 |
+| phpMyAdmin | http://localhost:8080 |
+
+---
+
+© 2025 COACHTECH 勤怠管理アプリ
