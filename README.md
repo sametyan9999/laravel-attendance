@@ -64,6 +64,20 @@ Seeder により以下の管理者ユーザーが作成されます。
 
 ## 環境構築
 
+### Dockerビルド
+1. リポジトリのクローン
+    ```bash
+    git clone https://github.com/sametyan9999/laravel-attendance.git
+    cd laravel-attendance
+    ```
+
+2. コンテナをビルド・起動
+    ```bash
+    docker compose up -d --build
+    ```
+※ MySQL が OS によって起動しない場合があるので、それぞれのPCに合わせて docker-compose.yml を編集してください。
+
+### Laravel環境構築
 1. PHPコンテナに入る
     ```bash
     docker compose exec php bash
@@ -130,6 +144,8 @@ MAIL_FROM_NAME="COACHTECH Attendance"
 FILESYSTEM_DRIVER=public
 
 ```
+※本プロジェクトでは Laravel 本体は `src/` ディレクトリ内に配置されています。
+`.env` や `artisan` などの Laravel ルートファイルも `src/` に置かれます。
 
 5. マイグレーション & シーディング
     ```bash
