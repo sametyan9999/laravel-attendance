@@ -59,8 +59,9 @@ Route::middleware('guest')->group(function () {
                 ->withInput();
         }
 
-        // 認証成功 → セッションにログイン状態を保存
+        // 認証成功 → セッションにログイン状態を保存（セッションID再生成）
         Auth::login($user);
+        $request->session()->regenerate();
 
         return redirect()->route('admin.attendance.list');
     })->name('admin.login');

@@ -9,6 +9,11 @@
     </a>
 
     @auth
+      {{-- スマホ用のメニューアイコン（PCではCSSで非表示） --}}
+      <button type="button" class="gt-menu-icon" aria-label="メニュー">
+        ☰
+      </button>
+
       {{-- ★ 特定ページでナビを非表示にするためのフラグ --}}
       @hasSection('hide-nav')
         {{-- このセクションが定義されているページでは右側ナビを出さない --}}

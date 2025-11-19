@@ -200,3 +200,72 @@ body.gt-body.gt-body--authed {
 .attd-actions.break-mode .btn-main:hover {
     background: #f9fafb !important;
 }
+
+/* ===================== */
+/* 共通ヘッダー関連      */
+/* ===================== */
+
+/* ヘッダー自体（あれば貼り付け） */
+.gt-header {
+    position: sticky;
+    /* 上に固定したくない場合は削除してOK */
+    top: 0;
+    z-index: 50;
+}
+
+/* メニューアイコンはデフォルトでは非表示（PC） */
+.gt-menu-icon {
+    display: none;
+}
+
+/* ===================== */
+/* スマホ表示（〜768px） */
+/* ===================== */
+@media screen and (max-width: 768px) {
+
+    /* ヘッダー内をロゴとアイコンで左右に分ける */
+    .gt-header__inner {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 16px;
+    }
+
+    /* PC用ナビはスマホでは非表示 */
+    .gt-nav {
+        display: none;
+    }
+
+    /* スマホではメニューアイコンを表示 */
+    .gt-menu-icon {
+        display: block;
+        background: transparent;
+        border: none;
+        color: #fff;
+        /* ヘッダーが黒背景想定 */
+        font-size: 24px;
+        cursor: default;
+        /* まだJSで開閉しないので pointer でなくてもOK */
+        margin-left: 16px;
+    }
+}
+
+/* ===================== */
+/* PCレイアウト微調整    */
+/* ===================== */
+
+/* PC幅ではメインコンテンツをある程度中央寄せにする（任意） */
+@media screen and (min-width: 1200px) {
+    main.container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 32px;
+    }
+}
+
+/* 申請一覧ページ用コンテナがある場合の例（class名は実際に合わせて） */
+.adm-req__inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 32px;
+}
