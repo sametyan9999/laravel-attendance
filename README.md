@@ -96,21 +96,19 @@ Seeder により以下の管理者ユーザーが作成されます。
 
 4. `.env` の設定を修正
 ```
-# =====================
-# 基本設定
-# =====================
-APP_NAME=COACHTECH Attendance
+APP_NAME="COACHTECH Attendance"
 APP_ENV=local
-APP_KEY=
+APP_KEY=base64:/3qC2Mf76ndzA6an3UbktOUN43fi8iHfV2DqIYsUD58=
 APP_DEBUG=true
 APP_URL=http://localhost
 
+APP_LOCALE=ja
+APP_FALLBACK_LOCALE=ja
+
 LOG_CHANNEL=stack
+LOG_DEPRECATIONS_CHANNEL=null
 LOG_LEVEL=debug
 
-# =====================
-# DB 設定（Docker 用）
-# =====================
 DB_CONNECTION=mysql
 DB_HOST=mysql
 DB_PORT=3306
@@ -118,17 +116,8 @@ DB_DATABASE=laravel_db
 DB_USERNAME=laravel_user
 DB_PASSWORD=laravel_pass
 
-# =====================
-# セッション / CSRF
-# =====================
-SESSION_DRIVER=file
-SESSION_LIFETIME=120
-SESSION_DOMAIN=localhost
-SANCTUM_STATEFUL_DOMAINS=localhost
+FILESYSTEM_DRIVER=public
 
-# =====================
-# メール設定（MailHog）
-# =====================
 MAIL_MAILER=smtp
 MAIL_HOST=mailhog
 MAIL_PORT=1025
@@ -138,11 +127,8 @@ MAIL_ENCRYPTION=null
 MAIL_FROM_ADDRESS="no-reply@example.com"
 MAIL_FROM_NAME="COACHTECH Attendance"
 
-# =====================
-# ファイルアップロード
-# =====================
-FILESYSTEM_DRIVER=public
-
+SESSION_DOMAIN=localhost
+SANCTUM_STATEFUL_DOMAINS=localhost
 ```
 ※本プロジェクトでは Laravel 本体は `src/` ディレクトリ内に配置されています。
 `.env` や `artisan` などの Laravel ルートファイルも `src/` に置かれます。
