@@ -88,10 +88,9 @@ Seeder により以下の管理者ユーザーが作成されます。
     composer install
     ```
 
-3. .env作成 & APP_KEY生成
+3. .env ファイルを作成
     ```bash
     cp .env.example .env
-    php artisan key:generate
     ```
 
 4. `.env` の設定を修正
@@ -133,14 +132,19 @@ SANCTUM_STATEFUL_DOMAINS=localhost
 ※本プロジェクトでは Laravel 本体は `src/` ディレクトリ内に配置されています。
 `.env` や `artisan` などの Laravel ルートファイルも `src/` に置かれます。
 
-5. マイグレーション & シーディング
+5. アプリケーションキーを生成
+    ```bash
+    php artisan key:generate
+    ```
+
+6. マイグレーション & シーディング
     ```bash
     php artisan migrate:fresh --seed
     ```
 
 ---
 
-### Seeder 内容
+### Seeder内容
 
 | Seeder名 | 内容 | 実行タイミング |
 |----------|------|-----------------------------|
