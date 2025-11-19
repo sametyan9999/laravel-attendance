@@ -1,0 +1,230 @@
+.
+├── composer.json
+├── composer.lock
+├── docker
+│   ├── mysql
+│   │   ├── data
+│   │   └── my.cnf
+│   ├── nginx
+│   │   └── default.conf
+│   └── php
+│       ├── Dockerfile
+│       └── php.ini
+├── docker-compose.yml
+├── ER.png
+├── README.md
+├── src
+│   ├── app
+│   │   ├── Actions
+│   │   ├── Console
+│   │   ├── Exceptions
+│   │   ├── Http
+│   │   ├── Models
+│   │   ├── Policies
+│   │   └── Providers
+│   ├── artisan
+│   ├── bootstrap
+│   │   ├── app.php
+│   │   └── cache
+│   ├── composer.json
+│   ├── composer.lock
+│   ├── config
+│   │   ├── app.php
+│   │   ├── auth.php
+│   │   ├── broadcasting.php
+│   │   ├── cache.php
+│   │   ├── cors.php
+│   │   ├── database.php
+│   │   ├── filesystems.php
+│   │   ├── fortify.php
+│   │   ├── hashing.php
+│   │   ├── logging.php
+│   │   ├── mail.php
+│   │   ├── queue.php
+│   │   ├── sanctum.php
+│   │   ├── services.php
+│   │   ├── session.php
+│   │   └── view.php
+│   ├── database
+│   │   ├── factories
+│   │   ├── migrations
+│   │   └── seeders
+│   ├── package.json
+│   ├── phpunit.xml
+│   ├── public
+│   │   ├── css
+│   │   ├── favicon.ico
+│   │   ├── images
+│   │   ├── index.php
+│   │   └── robots.txt
+│   ├── resources
+│   │   ├── css
+│   │   ├── js
+│   │   ├── lang
+│   │   └── views
+│   ├── routes
+│   │   ├── api.php
+│   │   ├── channels.php
+│   │   ├── console.php
+│   │   └── web.php
+│   ├── server.php
+│   ├── storage
+│   │   ├── app
+│   │   ├── framework
+│   │   └── logs
+│   ├── tests
+│   │   ├── CreatesApplication.php
+│   │   ├── Feature
+│   │   ├── TestCase.php
+│   │   └── Unit
+│   ├── tree.txt
+│   ├── vendor
+│   │   ├── asm89
+│   │   ├── autoload.php
+│   │   ├── bacon
+│   │   ├── bin
+│   │   ├── brick
+│   │   ├── carbonphp
+│   │   ├── composer
+│   │   ├── dasprid
+│   │   ├── dflydev
+│   │   ├── doctrine
+│   │   ├── dragonmantank
+│   │   ├── egulias
+│   │   ├── facade
+│   │   ├── fakerphp
+│   │   ├── filp
+│   │   ├── fruitcake
+│   │   ├── graham-campbell
+│   │   ├── guzzlehttp
+│   │   ├── hamcrest
+│   │   ├── laravel
+│   │   ├── league
+│   │   ├── mockery
+│   │   ├── monolog
+│   │   ├── myclabs
+│   │   ├── nesbot
+│   │   ├── nette
+│   │   ├── nikic
+│   │   ├── nunomaduro
+│   │   ├── opis
+│   │   ├── paragonie
+│   │   ├── phar-io
+│   │   ├── phpoption
+│   │   ├── phpunit
+│   │   ├── pragmarx
+│   │   ├── psr
+│   │   ├── psy
+│   │   ├── ralouphie
+│   │   ├── ramsey
+│   │   ├── sebastian
+│   │   ├── swiftmailer
+│   │   ├── symfony
+│   │   ├── theseer
+│   │   ├── tijsverkoyen
+│   │   ├── vlucas
+│   │   └── voku
+│   └── webpack.mix.js
+├── tree.txt
+└── vendor
+    ├── archtechx
+    │   └── enums
+    ├── autoload.php
+    ├── bin
+    │   ├── carbon
+    │   ├── patch-type-declarations
+    │   └── var-dump-server
+    ├── carbonphp
+    │   └── carbon-doctrine-types
+    ├── composer
+    │   ├── autoload_classmap.php
+    │   ├── autoload_files.php
+    │   ├── autoload_namespaces.php
+    │   ├── autoload_psr4.php
+    │   ├── autoload_real.php
+    │   ├── autoload_static.php
+    │   ├── ClassLoader.php
+    │   ├── installed.json
+    │   ├── installed.php
+    │   ├── InstalledVersions.php
+    │   ├── LICENSE
+    │   └── semver
+    ├── dflydev
+    │   └── dot-access-data
+    ├── doctrine
+    │   └── inflector
+    ├── dragon-code
+    │   ├── contracts
+    │   ├── pretty-array
+    │   └── support
+    ├── illuminate
+    │   ├── bus
+    │   ├── collections
+    │   ├── conditionable
+    │   ├── config
+    │   ├── console
+    │   ├── container
+    │   ├── contracts
+    │   ├── events
+    │   ├── filesystem
+    │   ├── macroable
+    │   ├── pipeline
+    │   ├── support
+    │   └── view
+    ├── laravel
+    │   └── prompts
+    ├── laravel-lang
+    │   ├── config
+    │   ├── lang
+    │   ├── locale-list
+    │   ├── locales
+    │   ├── native-country-names
+    │   ├── native-currency-names
+    │   ├── native-locale-names
+    │   └── publisher
+    ├── league
+    │   ├── commonmark
+    │   └── config
+    ├── nesbot
+    │   └── carbon
+    ├── nette
+    │   ├── schema
+    │   └── utils
+    ├── nunomaduro
+    │   └── termwind
+    ├── psr
+    │   ├── clock
+    │   ├── container
+    │   ├── event-dispatcher
+    │   ├── http-message
+    │   ├── log
+    │   └── simple-cache
+    ├── symfony
+    │   ├── clock
+    │   ├── console
+    │   ├── deprecation-contracts
+    │   ├── error-handler
+    │   ├── event-dispatcher
+    │   ├── event-dispatcher-contracts
+    │   ├── finder
+    │   ├── http-foundation
+    │   ├── http-kernel
+    │   ├── polyfill-ctype
+    │   ├── polyfill-intl-grapheme
+    │   ├── polyfill-intl-normalizer
+    │   ├── polyfill-mbstring
+    │   ├── polyfill-php80
+    │   ├── polyfill-php81
+    │   ├── polyfill-php83
+    │   ├── polyfill-php84
+    │   ├── polyfill-php85
+    │   ├── process
+    │   ├── service-contracts
+    │   ├── string
+    │   ├── translation
+    │   ├── translation-contracts
+    │   └── var-dumper
+    └── voku
+        └── portable-ascii
+
+168 directories, 60 files

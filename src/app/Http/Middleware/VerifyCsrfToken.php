@@ -13,5 +13,7 @@ class VerifyCsrfToken extends Middleware
      */
     protected $except = [
         //
+        // 例）API で CSRF を無効にしたいパスがあればここに書く
+        // 'api/*',
     ];
 }

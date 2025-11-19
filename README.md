@@ -178,18 +178,78 @@ docker compose exec php php artisan db:seed --class=AttendanceBreaksTableSeeder
 docker compose exec php php artisan db:seed --class=StampCorrectionRequestsTableSeeder
 ```
 
+---
+
 ## テスト実行方法
+本プロジェクトでは PHPUnit による自動テストを用意しています。
 ```bash
 docker compose exec php bash
 php artisan test
 ```
+env.testing は自動で読み込まれます
+```
+APP_ENV=testing
+APP_DEBUG=true
+DB_CONNECTION=sqlite
+DB_DATABASE=:memory:
+```
+
+---
+
+## ディレクトリ構成
+
+本プロジェクトでは、Laravel 本体は `src/` ディレクトリ内に配置されています。
+以下は `src` 配下の主なディレクトリ構成です。
+
+```bash
+src
+├─ app
+│  ├─ Actions
+│  │   └─ Fortify          # Fortify 用のカスタムアクション
+│  ├─ Http
+│  │   ├─ Controllers      # 画面ごとのコントローラ（Front / Admin）
+│  │   ├─ Middleware
+│  │   ├─ Requests         # FormRequest（バリデーション）
+│  │   └─ Responses
+│  ├─ Models               # User / Attendance / Break / 申請などのモデル
+│  ├─ Policies
+│  │   └─ AttendancePolicy.php  # 勤怠閲覧のアクセス制御
+│  └─ Providers            # 各種サービスプロバイダ
+├─ bootstrap
+├─ config                  # アプリ全体の設定（DB / Mail / Fortify など）
+├─ database
+│  ├─ factories            # テスト・シーディング用の Factory
+│  ├─ migrations           # テーブル定義
+│  └─ seeders              # 初期データ・ダミーデータ投入用
+├─ public
+│  ├─ css                  # ビルド済み CSS（画面別に分割）
+│  ├─ images               # ロゴ画像など
+│  └─ index.php            # エントリポイント
+├─ resources
+│  ├─ js                   # JS エントリ・bootstrap
+│  ├─ lang                 # 日本語 / 英語の翻訳ファイル
+│  └─ views
+│     ├─ admin             # 管理者画面用 Blade
+│     ├─ attendance        # 一般ユーザー勤怠画面用 Blade
+│     ├─ auth              # 認証関連画面
+│     ├─ components        # 共通コンポーネント（ヘッダーなど）
+│     └─ layouts           # 共通レイアウト
+├─ routes
+│  └─ web.php              # Web ルーティング定義
+├─ tests
+│  ├─ Feature              # 機能テスト（勤怠 / 認証 / 管理者機能など）
+│  └─ Unit                 # ユニットテスト
+└─ vendor                  # Composer 依存パッケージ
+```
+---
+
 ## 使用技術(実行環境)
 | 分類 | 使用技術 |
 |------|-------------------------------|
 | 言語 | PHP 8.1 |
 | フレームワーク | Laravel 8.x |
 | 認証 | Laravel Fortify / Laravel Sanctum |
-| DB | MySQL 8.4 |
+| DB | MySQL 8.0.26 |
 | フロント | Blade / jQuery 3.7 |
 | インフラ | Docker / Docker Compose |
 | 開発ツール | phpMyAdmin / MailHog |
@@ -209,41 +269,5 @@ php artisan test
 | phpMyAdmin | http://localhost:8080 |
 
 ---
-
-## プロジェクト構成
-
-laravel-attendance/
-├─ docker-compose.yml           # Docker設定ファイル
-├─ README.md                    # このドキュメント
-└─ src/                         # Laravelアプリ本体（コンテナ内では /var/www）
-    ├─ app/                     # コントローラ / モデル / FormRequest / ポリシーなど
-    │   ├─ Http/
-    │   │   ├─ Controllers/     # 画面ごとのコントローラ
-    │   │   ├─ Middleware/
-    │   │   └─ Requests/        # FormRequest（バリデーション）
-    │   └─ Models/              # User / Attendance / AttendanceBreak / StampCorrectionRequest
-    ├─ bootstrap/
-    ├─ config/
-    ├─ database/
-    │   ├─ factories/           # テスト・シーディング用ファクトリ
-    │   ├─ migrations/          # users / attendances / attendance_breaks / stamp_correction_requests etc.
-    │   └─ seeders/             # AdminUserSeeder ほか各種シーダー
-    ├─ public/                  # ドキュメントルート (http://localhost/)
-    │   ├─ css/                 # 各画面ごとのCSS（admin / attendance / auth / request など）
-    │   ├─ images/              # ロゴ画像など
-    │   └─ index.php
-    ├─ resources/
-    │   ├─ js/                  # app.js / bootstrap.js
-    │   ├─ lang/                # 多言語ファイル（ja / en）
-    │   └─ views/               # Bladeテンプレート
-    ├─ routes/
-    │   └─ web.php              # Webルーティング定義
-    ├─ storage/                 # ログ / キャッシュ / アップロードファイル
-    ├─ tests/                   # PHPUnitテスト
-    ├─ .env                     # 環境設定ファイル（※Git管理外）
-    └─ artisan                  # Laravel CLI エントリポイント
-
----
-
 
 © 2025 COACHTECH 勤怠管理アプリ
