@@ -4,37 +4,45 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
-use Carbon\CarbonImmutable;
+use Carbon\Carbon;
 
 class AttendancesTableSeeder extends Seeder
 {
     public function run(): void
     {
-        $base = CarbonImmutable::now()->startOfMonth();
-        // Staff A: 今月の1〜3日分を作成
-        for ($d = 1; $d <= 3; $d++) {
-            $date = $base->addDays($d - 1)->toDateString();
+        // 画面確認用の一般ユーザー1
+        $staff = DB::table('users')->where('email', 'user1@example.com')->first();
+
+        if (! $staff) {
+            // ユーザーがまだいない場合は何もしない
+            return;
+        }
+
+        // 今月の1日から、土日を除いた10営業日分を作成
+        $date = Carbon::now()->startOfMonth();
+        $workDates = [];
+
+        while (count($workDates) < 10) {
+            // ISO: 1=月 ... 5=金, 6=土, 7=日
+            if (!in_array($date->dayOfWeekIso, [6, 7], true)) {
+                $workDates[] = $date->copy();
+            }
+            $date->addDay();
+        }
+
+        foreach ($workDates as $d) {
+            $workDate = $d->toDateString();
+
             DB::table('attendances')->insert([
-                'user_id'      => DB::table('users')->where('email','staff-a@example.com')->value('id'),
-                'work_date'    => $date,
-                'clock_in_at'  => $base->addDays($d - 1)->setTime(9, 0),
-                'clock_out_at' => $base->addDays($d - 1)->setTime(18, 0),
+                'user_id'      => $staff->id,
+                'work_date'    => $workDate,
+                'clock_in_at'  => $d->copy()->setTime(9, 0),
+                'clock_out_at' => $d->copy()->setTime(18, 0),
                 'note'         => null,
-                'status'       => 'completed',
+                'status'       => 'completed', // 退勤済み
                 'created_at'   => now(),
                 'updated_at'   => now(),
             ]);
         }
-        // Staff B: 本日だけ出勤中
-        DB::table('attendances')->insert([
-            'user_id'      => DB::table('users')->where('email','staff-b@example.com')->value('id'),
-            'work_date'    => now()->toDateString(),
-            'clock_in_at'  => now()->copy()->setTime(10, 0),
-            'clock_out_at' => null,
-            'note'         => '外出予定あり',
-            'status'       => 'working',
-            'created_at'   => now(),
-            'updated_at'   => now(),
-        ]);
     }
 }

@@ -167,7 +167,12 @@ docker compose exec php php artisan db:seed --class=AttendanceBreaksTableSeeder
 # 修正申請データも確認したい場合
 docker compose exec php php artisan db:seed --class=StampCorrectionRequestsTableSeeder
 ```
+※Seeder で投入している承認済みの修正申請データは、
+画面レイアウト確認用のダミーデータです。
+勤怠テーブルの出勤・退勤時刻までは自動反映していません。
 
+実際の挙動（申請→承認で勤怠が更新される処理）は、
+画面から申請・承認を行うことで確認できます。
 ---
 
 ## テスト実行方法
@@ -260,4 +265,12 @@ src
 
 ---
 
+### 注意点（テスト・動作確認時）
+
+- 環境変数（.env）を変更したりコンテナを再起動した後に不具合が出た場合は
+  `php artisan config:clear` などでキャッシュをクリアしてください。
+- 古いタブからフォーム送信すると `419 Page Expired` になることがあります。
+  その場合はページをリロードしてから再度送信してください。
+
+---
 © 2025 COACHTECH 勤怠管理アプリ

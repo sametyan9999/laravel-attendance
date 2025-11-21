@@ -15,12 +15,12 @@ class AttendanceDetailTest extends TestCase
     public function 勤怠詳細画面に表示されるデータが選択したものになっている()
     {
         $admin = User::factory()->create(['role' => 'admin']);
-        $user = User::factory()->create();
+        $user  = User::factory()->create();
 
         $att = Attendance::factory()->create([
-            'user_id' => $user->id,
-            'work_date' => '2024-01-10',
-            'clock_in_at' => '2024-01-10 09:00:00',
+            'user_id'      => $user->id,
+            'work_date'    => '2024-01-10',
+            'clock_in_at'  => '2024-01-10 09:00:00',
             'clock_out_at' => '2024-01-10 18:00:00',
         ]);
 
@@ -36,79 +36,88 @@ class AttendanceDetailTest extends TestCase
     public function 出勤時間が退勤時間より後になっている場合_エラーメッセージが表示される()
     {
         $admin = User::factory()->create(['role' => 'admin']);
-        $user = User::factory()->create();
+        $user  = User::factory()->create();
 
         $att = Attendance::factory()->create([
-            'user_id' => $user->id,
+            'user_id'   => $user->id,
             'work_date' => '2024-01-10',
         ]);
 
         $this->actingAs($admin)
             ->put("/admin/attendance/{$att->id}", [
-                'clock_in' => '18:00',
+                'clock_in'  => '18:00',
                 'clock_out' => '09:00',
             ])
             ->assertSessionHasErrors(['clock_out'])
-            ->assertSessionHasErrors(['clock_out' => '退勤時間が出勤時間より前になっています。']);
+            // ★ テストケース一覧に合わせてメッセージ修正
+            ->assertSessionHasErrors([
+                'clock_out' => '出勤時間もしくは退勤時間が不適切な値です',
+            ]);
     }
 
     /** @test */
     public function 休憩開始時間が退勤時間より後になっている場合_エラーメッセージが表示される()
     {
         $admin = User::factory()->create(['role' => 'admin']);
-        $user = User::factory()->create();
+        $user  = User::factory()->create();
 
         $att = Attendance::factory()->create([
-            'user_id' => $user->id,
+            'user_id'   => $user->id,
             'work_date' => '2024-01-10',
         ]);
 
         $this->actingAs($admin)
             ->put("/admin/attendance/{$att->id}", [
-                'clock_in' => '09:00',
+                'clock_in'  => '09:00',
                 'clock_out' => '10:00',
                 'break1_in' => '11:00',
             ])
-            ->assertSessionHasErrors(['break1_in' => '休憩時間が勤務時間の範囲外です。']);
+            // ★ 「休憩時間が不適切な値です」に変更
+            ->assertSessionHasErrors([
+                'break1_in' => '休憩時間が不適切な値です',
+            ]);
     }
 
     /** @test */
     public function 休憩終了時間が退勤時間より後になっている場合_エラーメッセージが表示される()
     {
         $admin = User::factory()->create(['role' => 'admin']);
-        $user = User::factory()->create();
+        $user  = User::factory()->create();
 
         $att = Attendance::factory()->create([
-            'user_id' => $user->id,
+            'user_id'   => $user->id,
             'work_date' => '2024-01-10',
         ]);
 
         $this->actingAs($admin)
             ->put("/admin/attendance/{$att->id}", [
-                'clock_in' => '09:00',
-                'clock_out' => '10:00',
-                'break1_in' => '09:30',
+                'clock_in'   => '09:00',
+                'clock_out'  => '10:00',
+                'break1_in'  => '09:30',
                 'break1_out' => '11:00',
             ])
-            ->assertSessionHasErrors(['break1_out' => '休憩1の終了が開始より前になっています。']);
+            // ★ 「休憩時間もしくは退勤時間が不適切な値です」に変更
+            ->assertSessionHasErrors([
+                'break1_out' => '休憩時間もしくは退勤時間が不適切な値です',
+            ]);
     }
 
     /** @test */
     public function 備考欄が未入力の場合のエラーメッセージが表示される()
     {
         $admin = User::factory()->create(['role' => 'admin']);
-        $user = User::factory()->create();
+        $user  = User::factory()->create();
 
         $att = Attendance::factory()->create([
-            'user_id' => $user->id,
+            'user_id'   => $user->id,
             'work_date' => '2024-01-10',
         ]);
 
         $this->actingAs($admin)
             ->put("/admin/attendance/{$att->id}", [
-                'clock_in' => '09:00',
+                'clock_in'  => '09:00',
                 'clock_out' => '18:00',
-                'note' => '',
+                'note'      => '',
             ])
             ->assertSessionHasErrors(['note']);
     }

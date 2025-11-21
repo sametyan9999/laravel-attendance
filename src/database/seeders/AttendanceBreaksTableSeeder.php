@@ -4,24 +4,32 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 class AttendanceBreaksTableSeeder extends Seeder
 {
     public function run(): void
     {
-        // Staff A の 1日目の勤怠に 12:00-13:00 の休憩
-        $attendanceId = DB::table('attendances')
-            ->orderBy('id')
-            ->first()->id ?? null;
+        // 画面確認用ユーザー
+        $staff = DB::table('users')->where('email', 'user1@example.com')->first();
 
-        if ($attendanceId) {
-            $in  = now()->copy()->setTime(12, 0)->subDays(2);
-            $out = now()->copy()->setTime(13, 0)->subDays(2);
+        if (! $staff) {
+            return;
+        }
+
+        // このユーザーの勤怠（さっきの Seeder で作った10営業日分）
+        $attendances = DB::table('attendances')
+            ->where('user_id', $staff->id)
+            ->orderBy('work_date')
+            ->get();
+
+        foreach ($attendances as $attendance) {
+            $workDate = Carbon::parse($attendance->work_date);
 
             DB::table('attendance_breaks')->insert([
-                'attendance_id' => $attendanceId,
-                'break_in_at'   => $in,
-                'break_out_at'  => $out,
+                'attendance_id' => $attendance->id,
+                'break_in_at'   => $workDate->copy()->setTime(12, 0),
+                'break_out_at'  => $workDate->copy()->setTime(13, 0),
                 'created_at'    => now(),
                 'updated_at'    => now(),
             ]);
