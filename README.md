@@ -173,6 +173,7 @@ docker compose exec php php artisan db:seed --class=StampCorrectionRequestsTable
 
 実際の挙動（申請→承認で勤怠が更新される処理）は、
 画面から申請・承認を行うことで確認できます。
+
 ---
 
 ## テスト実行方法
