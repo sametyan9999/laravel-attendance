@@ -171,9 +171,6 @@ docker compose exec php php artisan db:seed --class=StampCorrectionRequestsTable
 画面レイアウト確認用のダミーデータです。
 勤怠テーブルの出勤・退勤時刻までは自動反映していません。
 
-実際の挙動（申請→承認で勤怠が更新される処理）は、
-画面から申請・承認を行うことで確認できます。
-
 ---
 
 ## テスト実行方法
@@ -252,8 +249,12 @@ src
 | テスト | PHPUnit 9.5 |
 | バージョン管理 | Git / GitHub |
 
+---
+
 ## ER図
 ![alt text](ER.png)
+
+---
 
 ## アプリケーションURL
 | ページ | URL |
