@@ -19,29 +19,27 @@ class AttendanceRecordController extends Controller
     /** PG03: 本日の打刻画面 */
     public function today(Request $request)
     {
-        $user  = Auth::user();
-        $now   = CarbonImmutable::now()->timezone(config('app.timezone'));
+        $user = Auth::user();
+        $now = CarbonImmutable::now()->timezone(config('app.timezone'));
         $today = $now->toDateString();
 
-        // ★ その日の勤怠を「日付」で検索し、なければ1件だけ新規作成
         $attendance = Attendance::where('user_id', $user->id)
             ->whereDate('work_date', $today)
             ->first();
 
         if (!$attendance) {
-            $attendance            = new Attendance();
-            $attendance->user_id   = $user->id;
+            $attendance = new Attendance();
+            $attendance->user_id = $user->id;
             $attendance->work_date = $today;
-            $attendance->status    = 'off_duty';
+            $attendance->status = 'off_duty';
             $attendance->save();
         }
 
-        // 休憩も読み込んでおく
         $attendance->load('breaks');
 
         return view('attendance.today', [
             'attendance' => $attendance,
-            'now'        => $now,
+            'now' => $now,
         ]);
     }
 
@@ -54,7 +52,7 @@ class AttendanceRecordController extends Controller
             }
 
             $attendance->clock_in_at = $now;
-            $attendance->status      = 'working';
+            $attendance->status = 'working';
             $attendance->save();
         });
     }
@@ -70,7 +68,7 @@ class AttendanceRecordController extends Controller
             DB::transaction(function () use ($attendance, $now) {
                 AttendanceBreak::create([
                     'attendance_id' => $attendance->id,
-                    'break_in_at'   => $now,
+                    'break_in_at' => $now,
                 ]);
 
                 $attendance->status = 'break';
@@ -89,6 +87,7 @@ class AttendanceRecordController extends Controller
 
             DB::transaction(function () use ($attendance, $now) {
                 $last = $attendance->breaks()->latest('id')->first();
+
                 if (!$last || $last->break_out_at) {
                     abort(422, '休憩の開始が見つかりません。');
                 }
@@ -111,9 +110,9 @@ class AttendanceRecordController extends Controller
             }
 
             DB::transaction(function () use ($attendance, $now) {
-                // 休憩中のまま退勤した場合、最後の休憩を締める
                 if ($attendance->status === 'break') {
                     $last = $attendance->breaks()->latest('id')->first();
+
                     if ($last && !$last->break_out_at) {
                         $last->break_out_at = $now;
                         $last->save();
@@ -121,7 +120,7 @@ class AttendanceRecordController extends Controller
                 }
 
                 $attendance->clock_out_at = $now;
-                $attendance->status       = 'completed';
+                $attendance->status = 'completed';
                 $attendance->save();
             });
         });
@@ -131,33 +130,31 @@ class AttendanceRecordController extends Controller
     public function indexMonthly(Request $request)
     {
         $user = Auth::user();
-
         $monthStr = (string) $request->query('month', '');
-        if (preg_match('/^\d{4}-\d{2}$/', $monthStr)) {
-            $base = CarbonImmutable::parse($monthStr . '-01')->startOfMonth();
-        } else {
-            $base = CarbonImmutable::now()->startOfMonth();
-        }
+
+        $base = preg_match('/^\d{4}-\d{2}$/', $monthStr)
+            ? CarbonImmutable::parse($monthStr . '-01')->startOfMonth()
+            : CarbonImmutable::now()->startOfMonth();
 
         $start = $base->startOfMonth();
-        $end   = $base->endOfMonth();
+        $end = $base->endOfMonth();
 
         $attendances = Attendance::with('breaks')
             ->where('user_id', $user->id)
             ->whereBetween('work_date', [$start->toDateString(), $end->toDateString()])
             ->get()
-            ->keyBy(fn ($r) => Carbon::parse($r->work_date)->format('Y-m-d'));
+            ->keyBy(fn($r) => Carbon::parse($r->work_date)->format('Y-m-d'));
 
-        $days    = [];
+        $days = [];
         $records = [];
 
         for ($d = $start; $d <= $end; $d = $d->addDay()) {
             $days[] = $d;
 
-            /** @var Attendance|null $att */
             $att = $attendances->get($d->toDateString());
             if ($att) {
                 $breakMin = 0;
+
                 foreach ($att->breaks as $b) {
                     if ($b->break_in_at && $b->break_out_at) {
                         $breakMin += Carbon::parse($b->break_out_at)
@@ -169,15 +166,13 @@ class AttendanceRecordController extends Controller
                 if ($att->clock_in_at && $att->clock_out_at) {
                     $totalMin = Carbon::parse($att->clock_out_at)
                         ->diffInMinutes(Carbon::parse($att->clock_in_at)) - $breakMin;
-                    if ($totalMin < 0) {
-                        $totalMin = 0;
-                    }
+                    $totalMin = max($totalMin, 0);
                 }
 
                 $records[$d->toDateString()] = [
-                    'id'            => $att->id,
-                    'clock_in'      => $att->clock_in_at,
-                    'clock_out'     => $att->clock_out_at,
+                    'id' => $att->id,
+                    'clock_in' => $att->clock_in_at,
+                    'clock_out' => $att->clock_out_at,
                     'break_minutes' => $breakMin ?: null,
                     'total_minutes' => $totalMin,
                 ];
@@ -185,11 +180,11 @@ class AttendanceRecordController extends Controller
         }
 
         return view('attendance.list', [
-            'month'     => $base,
+            'month' => $base,
             'prevMonth' => $base->subMonth(),
             'nextMonth' => $base->addMonth(),
-            'days'      => $days,
-            'records'   => $records,
+            'days' => $days,
+            'records' => $records,
         ]);
     }
 
@@ -207,8 +202,8 @@ class AttendanceRecordController extends Controller
         $hasPending = !is_null($pendingRequest);
 
         return view('attendance.detail', [
-            'attendance'     => $attendance,
-            'hasPending'     => $hasPending,
+            'attendance' => $attendance,
+            'hasPending' => $hasPending,
             'pendingRequest' => $pendingRequest,
         ]);
     }
@@ -220,7 +215,6 @@ class AttendanceRecordController extends Controller
             abort(403);
         }
 
-        // 既に承認待ちがある場合はエラー
         $hasPending = StampCorrectionRequest::where('attendance_id', $attendance->id)
             ->where('status', 'pending')
             ->exists();
@@ -231,13 +225,9 @@ class AttendanceRecordController extends Controller
                 ->withInput();
         }
 
-        // FormRequest で基本バリデーション済み
         $validated = $request->validated();
-
-        // 相関バリデーション（勤務時間・休憩時間の整合性）
         $this->validateTimeRelations($attendance->work_date, $validated);
 
-        // 時刻変換ヘルパ
         $toDT = function (?string $hm) use ($attendance) {
             if (!$hm) {
                 return null;
@@ -249,10 +239,9 @@ class AttendanceRecordController extends Controller
             );
         };
 
-        $reqClockIn  = $toDT($validated['clock_in']  ?? null);
+        $reqClockIn = $toDT($validated['clock_in'] ?? null);
         $reqClockOut = $toDT($validated['clock_out'] ?? null);
 
-        // 休憩合計（分）を計算（2回 + 追加分）
         $pairs = [
             [$validated['break1_in'] ?? null, $validated['break1_out'] ?? null],
             [$validated['break2_in'] ?? null, $validated['break2_out'] ?? null],
@@ -260,8 +249,9 @@ class AttendanceRecordController extends Controller
 
         $extraInputs = $request->input('extra_breaks', []);
         foreach ($extraInputs as $ex) {
-            $iHm = $ex['in']  ?? null;
+            $iHm = $ex['in'] ?? null;
             $oHm = $ex['out'] ?? null;
+
             if (
                 $iHm && $oHm &&
                 preg_match('/^\d{2}:\d{2}$/', $iHm) &&
@@ -276,27 +266,27 @@ class AttendanceRecordController extends Controller
             if ($i && $o) {
                 $ii = $toDT($i);
                 $oo = $toDT($o);
+
                 if ($ii && $oo && $oo->greaterThan($ii)) {
                     $breakMin += $oo->diffInMinutes($ii);
                 }
             }
         }
+
         $breakMin = $breakMin > 0 ? $breakMin : null;
 
-        // 保存処理
         DB::transaction(function () use ($attendance, $validated, $reqClockIn, $reqClockOut, $breakMin) {
-            // 備考は attendances.note として保持
             $attendance->note = $validated['note'] ?? null;
             $attendance->save();
 
             StampCorrectionRequest::create([
-                'attendance_id'           => $attendance->id,
-                'requested_by'            => Auth::id(),
-                'status'                  => 'pending',
-                'requested_clock_in_at'   => $reqClockIn,
-                'requested_clock_out_at'  => $reqClockOut,
+                'attendance_id' => $attendance->id,
+                'requested_by' => Auth::id(),
+                'status' => 'pending',
+                'requested_clock_in_at' => $reqClockIn,
+                'requested_clock_out_at' => $reqClockOut,
                 'requested_break_minutes' => $breakMin,
-                'requested_note'          => $attendance->note,
+                'requested_note' => $attendance->note,
             ]);
         });
 
@@ -305,7 +295,7 @@ class AttendanceRecordController extends Controller
             ->with('ok', true);
     }
 
-    /** 勤務時間・休憩時間の相関チェック */
+    /** 勤务時間・休憩時間の相関チェック */
     private function validateTimeRelations($workDate, array $v): void
     {
         $toDT = function (?string $hm) use ($workDate) {
@@ -319,51 +309,42 @@ class AttendanceRecordController extends Controller
             );
         };
 
-        $ci  = $toDT($v['clock_in']  ?? null);
-        $co  = $toDT($v['clock_out'] ?? null);
-        $b1i = $toDT($v['break1_in']  ?? null);
+        $ci = $toDT($v['clock_in'] ?? null);
+        $co = $toDT($v['clock_out'] ?? null);
+        $b1i = $toDT($v['break1_in'] ?? null);
         $b1o = $toDT($v['break1_out'] ?? null);
-        $b2i = $toDT($v['break2_in']  ?? null);
+        $b2i = $toDT($v['break2_in'] ?? null);
         $b2o = $toDT($v['break2_out'] ?? null);
 
         $errors = [];
 
-        // ① 出勤 > 退勤
         if ($ci && $co && $co->lessThanOrEqualTo($ci)) {
-            // テストが見るキーは clock_out
             $errors['clock_out'] = '出勤時間もしくは退勤時間が不適切な値です';
         }
 
-        // ③ 休憩終了 <= 開始
         if ($b1i && $b1o && $b1o->lessThanOrEqualTo($b1i)) {
             $errors['break1_out'] = '休憩時間もしくは退勤時間が不適切な値です';
         }
+
         if ($b2i && $b2o && $b2o->lessThanOrEqualTo($b2i)) {
             $errors['break2_out'] = '休憩時間もしくは退勤時間が不適切な値です';
         }
 
-        // ②・③ 勤務時間の範囲外チェック（休憩開始・終了が勤務時間の外ならエラー）
         foreach (
             [
                 ['i' => $b1i, 'o' => $b1o, 'k' => 'break1_in'],
                 ['i' => $b2i, 'o' => $b2o, 'k' => 'break2_in'],
             ] as $bk
         ) {
-            $keyIn  = $bk['k'];
+            $keyIn = $bk['k'];
             $keyOut = str_replace('_in', '_out', $keyIn);
 
-            // 休憩開始が勤務時間の外
-            if ($bk['i']) {
-                if (($ci && $bk['i']->lessThan($ci)) || ($co && $bk['i']->greaterThan($co))) {
-                    $errors[$keyIn] = '休憩時間が不適切な値です';
-                }
+            if ($bk['i'] && (($ci && $bk['i']->lessThan($ci)) || ($co && $bk['i']->greaterThan($co)))) {
+                $errors[$keyIn] = '休憩時間が不適切な値です';
             }
 
-            // 休憩終了が勤務時間の外
-            if ($bk['o']) {
-                if (($ci && $bk['o']->lessThan($ci)) || ($co && $bk['o']->greaterThan($co))) {
-                    $errors[$keyOut] = '休憩時間もしくは退勤時間が不適切な値です';
-                }
+            if ($bk['o'] && (($ci && $bk['o']->lessThan($ci)) || ($co && $bk['o']->greaterThan($co)))) {
+                $errors[$keyOut] = '休憩時間もしくは退勤時間が不適切な値です';
             }
         }
 
@@ -375,20 +356,19 @@ class AttendanceRecordController extends Controller
     /** 打刻状態遷移の共通処理 */
     private function transition(\Closure $handler)
     {
-        $user  = Auth::user();
-        $now   = CarbonImmutable::now()->timezone(config('app.timezone'));
+        $user = Auth::user();
+        $now = CarbonImmutable::now()->timezone(config('app.timezone'));
         $today = $now->toDateString();
 
-        // ★ その日の勤怠を日付で取得し、なければ新規作成
         $attendance = Attendance::where('user_id', $user->id)
             ->whereDate('work_date', $today)
             ->first();
 
         if (!$attendance) {
-            $attendance            = new Attendance();
-            $attendance->user_id   = $user->id;
+            $attendance = new Attendance();
+            $attendance->user_id = $user->id;
             $attendance->work_date = $today;
-            $attendance->status    = 'off_duty';
+            $attendance->status = 'off_duty';
             $attendance->save();
         }
 

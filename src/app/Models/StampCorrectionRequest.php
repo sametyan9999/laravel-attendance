@@ -23,10 +23,10 @@ class StampCorrectionRequest extends Model
     ];
 
     protected $casts = [
-        'requested_clock_in_at'  => 'datetime',
+        'requested_clock_in_at' => 'datetime',
         'requested_clock_out_at' => 'datetime',
-        'approved_at'            => 'datetime',
-        'requested_break_minutes'=> 'integer',
+        'approved_at' => 'datetime',
+        'requested_break_minutes' => 'integer',
     ];
 
     public function attendance(): BelongsTo

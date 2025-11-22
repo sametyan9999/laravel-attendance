@@ -17,7 +17,7 @@ class AttendanceBreak extends Model
     ];
 
     protected $casts = [
-        'break_in_at'  => 'datetime',
+        'break_in_at' => 'datetime',
         'break_out_at' => 'datetime',
     ];
 

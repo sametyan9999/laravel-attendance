@@ -11,10 +11,6 @@ class RequestRejectRequest extends FormRequest
         return true;
     }
 
-    /**
-     * 却下理由（任意）のバリデーション
-     * もともと Admin\RequestController@reject の $http->validate() と同じ
-     */
     public function rules(): array
     {
         return [

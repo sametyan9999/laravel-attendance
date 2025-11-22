@@ -14,34 +14,21 @@ use Illuminate\Support\Facades\DB;
 
 class AttendanceController extends Controller
 {
-    /**
-     * PG08: 日次勤怠一覧（管理者）
-     *
-     * ?date=YYYY-MM-DD があればその日、無ければ「今日」を対象にする。
-     * 1行 = 1ユーザー分の勤怠。
-     */
     public function monthly(Request $request)
     {
-        // 対象日を決定
         $dateStr = $request->get('date');
 
-        if ($dateStr && preg_match('/^\d{4}-\d{2}-\d{2}$/', $dateStr)) {
-            $baseDate = CarbonImmutable::parse($dateStr)->startOfDay();
-        } else {
-            $baseDate = CarbonImmutable::now()
-                ->timezone(config('app.timezone'))
-                ->startOfDay();
-        }
+        $baseDate = $dateStr && preg_match('/^\d{4}-\d{2}-\d{2}$/', $dateStr)
+            ? CarbonImmutable::parse($dateStr)->startOfDay()
+            : CarbonImmutable::now()->timezone(config('app.timezone'))->startOfDay();
 
         $targetDate = $baseDate->toDateString();
 
-        // 一般ユーザーのみ
         $users = User::query()
             ->where('role', 'user')
             ->orderBy('id')
             ->get();
 
-        // 対象日の勤怠を取得（休憩もまとめて）
         $attendances = Attendance::with('breaks')
             ->whereDate('work_date', $targetDate)
             ->get()
@@ -50,11 +37,10 @@ class AttendanceController extends Controller
         $rows = [];
 
         foreach ($users as $user) {
-            /** @var \App\Models\Attendance|null $att */
             $att = $attendances->get($user->id);
 
-            $clockIn      = $att?->clock_in_at;
-            $clockOut     = $att?->clock_out_at;
+            $clockIn = $att?->clock_in_at;
+            $clockOut = $att?->clock_out_at;
             $breakMinutes = null;
             $totalMinutes = null;
 
@@ -80,21 +66,20 @@ class AttendanceController extends Controller
         ]);
     }
 
-    /**
-     * 勤怠1件分の休憩合計(分)と実働時間(分)を計算
-     */
     private function calcMinutes(Attendance $attendance): array
     {
         $breakMin = 0;
 
         foreach ($attendance->breaks as $b) {
-            if ($b->break_in_at && $b->break_out_at) {
-                $in  = Carbon::parse($b->break_in_at);
-                $out = Carbon::parse($b->break_out_at);
+            if (!$b->break_in_at || !$b->break_out_at) {
+                continue;
+            }
 
-                if ($out->greaterThan($in)) {
-                    $breakMin += $out->diffInMinutes($in);
-                }
+            $in = Carbon::parse($b->break_in_at);
+            $out = Carbon::parse($b->break_out_at);
+
+            if ($out->greaterThan($in)) {
+                $breakMin += $out->diffInMinutes($in);
             }
         }
 
@@ -105,9 +90,7 @@ class AttendanceController extends Controller
             $co = Carbon::parse($attendance->clock_out_at);
 
             $totalMin = $co->diffInMinutes($ci) - $breakMin;
-            if ($totalMin < 0) {
-                $totalMin = 0;
-            }
+            $totalMin = max($totalMin, 0);
         }
 
         $breakMin = $breakMin > 0 ? $breakMin : null;
@@ -115,9 +98,6 @@ class AttendanceController extends Controller
         return [$breakMin, $totalMin];
     }
 
-    /**
-     * PG10: スタッフ一覧
-     */
     public function staffIndex()
     {
         $users = User::orderBy('name')->paginate(20);
@@ -125,12 +105,8 @@ class AttendanceController extends Controller
         return view('admin.staff.index', compact('users'));
     }
 
-    /**
-     * PG11: スタッフ別 月次一覧（1ヶ月分の日を全部出す）
-     */
     public function byUser(Request $request, User $user)
     {
-        // ?month=YYYY-MM があればその月、無ければ今月
         $month = $request->get('month');
 
         $base = $month
@@ -138,9 +114,8 @@ class AttendanceController extends Controller
             : CarbonImmutable::now()->startOfMonth();
 
         $start = $base->startOfMonth();
-        $end   = $base->endOfMonth();
+        $end = $base->endOfMonth();
 
-        // この月の勤怠をまとめて取得して work_date でキー化
         $attendances = Attendance::with('breaks')
             ->where('user_id', $user->id)
             ->whereBetween('work_date', [$start->toDateString(), $end->toDateString()])
@@ -152,19 +127,17 @@ class AttendanceController extends Controller
 
         $rows = [];
 
-        // 1日〜末日までループして、無い日も1行作る
         for ($d = $start; $d <= $end; $d = $d->addDay()) {
             $key = $d->toDateString();
-            /** @var Attendance|null $att */
             $att = $attendances->get($key);
 
             $breakMinutes = null;
             $totalMinutes = null;
-            $clockIn      = null;
-            $clockOut     = null;
+            $clockIn = null;
+            $clockOut = null;
 
             if ($att) {
-                $clockIn  = $att->clock_in_at;
+                $clockIn = $att->clock_in_at;
                 $clockOut = $att->clock_out_at;
                 [$breakMinutes, $totalMinutes] = $this->calcMinutes($att);
             }
@@ -186,12 +159,8 @@ class AttendanceController extends Controller
         ]);
     }
 
-    /**
-     * ★ PG11: スタッフ別 月次一覧 CSV 出力
-     */
     public function byUserCsv(Request $request, User $user)
     {
-        // ?month=YYYY-MM があればその月、無ければ今月
         $month = $request->get('month');
 
         $base = $month
@@ -199,9 +168,8 @@ class AttendanceController extends Controller
             : CarbonImmutable::now()->startOfMonth();
 
         $start = $base->startOfMonth();
-        $end   = $base->endOfMonth();
+        $end = $base->endOfMonth();
 
-        // この月の勤怠をまとめて取得して work_date でキー化
         $attendances = Attendance::with('breaks')
             ->where('user_id', $user->id)
             ->whereBetween('work_date', [$start->toDateString(), $end->toDateString()])
@@ -216,16 +184,19 @@ class AttendanceController extends Controller
         return response()->streamDownload(function () use ($start, $end, $attendances, $user) {
             $out = fopen('php://output', 'w');
 
-            // ヘッダー行
             fputcsv($out, ['氏名', '日付', '出勤', '退勤', '休憩', '合計']);
 
             $fmtTime = function ($v) {
-                if (!$v) return '';
+                if (!$v) {
+                    return '';
+                }
                 return Carbon::parse($v)->format('H:i');
             };
 
             $fmtHM = function ($min) {
-                if (!is_numeric($min)) return '';
+                if (!is_numeric($min)) {
+                    return '';
+                }
                 $h = intdiv((int)$min, 60);
                 $m = (int)$min % 60;
                 return sprintf('%d:%02d', $h, $m);
@@ -233,10 +204,9 @@ class AttendanceController extends Controller
 
             for ($d = $start; $d <= $end; $d = $d->addDay()) {
                 $key = $d->format('Y-m-d');
-                /** @var Attendance|null $att */
                 $att = $attendances->get($key);
 
-                $clockIn  = $att?->clock_in_at;
+                $clockIn = $att?->clock_in_at;
                 $clockOut = $att?->clock_out_at;
 
                 [$breakMin, $totalMin] = $att
@@ -259,9 +229,6 @@ class AttendanceController extends Controller
         ]);
     }
 
-    /**
-     * PG09: 日次詳細（管理者編集）
-     */
     public function show(Attendance $attendance)
     {
         $attendance->load('breaks', 'user');
@@ -269,16 +236,8 @@ class AttendanceController extends Controller
         return view('admin.attendance.detail', compact('attendance'));
     }
 
-    /**
-     * PG09: 日次の直接修正
-     * （テストの期待に合わせたバリデーション）
-     *
-     * → AttendanceUpdateRequest にバリデーションを移動し、
-     *    ここでは validated データを使うだけにしている。
-     */
     public function update(AttendanceUpdateRequest $request, Attendance $attendance)
     {
-        // 1次・2次バリデーション済みデータを取得
         $data = $request->validated();
 
         DB::transaction(function () use ($attendance, $data) {
@@ -289,14 +248,13 @@ class AttendanceController extends Controller
                 'status'       => $data['status'],
             ])->save();
 
-            // 休憩は単純化のため全削除→再作成
             $attendance->breaks()->delete();
 
             foreach ($data['breaks'] ?? [] as $b) {
                 if (!empty($b['break_in_at']) || !empty($b['break_out_at'])) {
                     AttendanceBreak::create([
                         'attendance_id' => $attendance->id,
-                        'break_in_at'   => $b['break_in_at']  ?? null,
+                        'break_in_at'   => $b['break_in_at'] ?? null,
                         'break_out_at'  => $b['break_out_at'] ?? null,
                     ]);
                 }

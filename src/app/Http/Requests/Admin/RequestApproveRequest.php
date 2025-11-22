@@ -11,10 +11,6 @@ class RequestApproveRequest extends FormRequest
         return true;
     }
 
-    /**
-     * 管理者承認時の任意メモ用
-     * もともと Admin\RequestController@approve の $http->validate() と同じ
-     */
     public function rules(): array
     {
         return [
