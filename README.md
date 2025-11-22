@@ -126,7 +126,7 @@ MAIL_ENCRYPTION=null
 MAIL_FROM_ADDRESS="no-reply@example.com"
 MAIL_FROM_NAME="COACHTECH Attendance"
 
-SESSION_DOMAIN=localhost
+SESSION_DOMAIN=
 SANCTUM_STATEFUL_DOMAINS=localhost
 ```
 ※本プロジェクトでは Laravel 本体は `src/` ディレクトリ内に配置されています。
@@ -270,23 +270,44 @@ src
 ## 🔧 開発中によく発生するエラーと対処法
 
 ### 419 Page Expired（ログイン時）
-Laravel のセッション・CSRFトークンが無効になった場合に発生します。
 
-#### ▼対処方法（コマンド）
+Laravelの **セッション / CSRFトークンが無効になった場合** に発生します。
+以下のケースで起こることが多いです：
+
+- `.env` の内容を変更した後にログイン
+- コンテナ再起動後にログイン
+- 古いタブ / フォームから送信したとき
+- Cookie が壊れている場合
+
+---
+
+#### 主な原因
+
+| 原因 | 例 |
+|------|------------------------------|
+| `.env` の変更後 | DB設定やAPP_URLを変更した |
+| キャッシュが残っている | config/cacheが古いまま |
+| セッション期限切れ | 古いタブでPOST送信 |
+| Cookieが壊れている | localhostのCookieが古い |
+
+---
+
+#### 対処方法（サーバー側）
+
 ```bash
 docker compose exec php php artisan config:clear
 docker compose exec php php artisan cache:clear
 docker compose exec php php artisan route:clear
 docker compose exec php php artisan view:clear
 ```
----
+#### `.env` の注意点（419防止のため重要）
 
-### 注意点（テスト・動作確認時）
+以下の設定にしておくと、419エラーを防ぎやすくなります：
 
-- 環境変数（.env）を変更したりコンテナを再起動した後に不具合が出た場合は
-  `php artisan config:clear` などでキャッシュをクリアしてください。
-- 古いタブからフォーム送信すると `419 Page Expired` になることがあります。
-  その場合はページをリロードしてから再度送信してください。
-
+```env
+APP_URL=http://localhost
+SESSION_DOMAIN=
+SESSION_DRIVER=file
+```
 ---
 © 2025 COACHTECH 勤怠管理アプリ
