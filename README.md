@@ -266,6 +266,20 @@ src
 
 ---
 
+## 🔧 開発中によく発生するエラーと対処法
+
+### 419 Page Expired（ログイン時）
+Laravel のセッション・CSRFトークンが無効になった場合に発生します。
+
+#### ▼対処方法（コマンド）
+```bash
+docker compose exec php php artisan config:clear
+docker compose exec php php artisan cache:clear
+docker compose exec php php artisan route:clear
+docker compose exec php php artisan view:clear
+```
+---
+
 ### 注意点（テスト・動作確認時）
 
 - 環境変数（.env）を変更したりコンテナを再起動した後に不具合が出た場合は
