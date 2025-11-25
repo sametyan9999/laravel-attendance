@@ -12,7 +12,11 @@
         <div class="admin-login__inner">
             <h1 class="admin-login__title">管理者ログイン</h1>
 
-            <form class="admin-login__form" method="POST" action="{{ route('login') }}">
+            {{-- ★ 管理者用ルートにPOST & ブラウザバリデーションOFF --}}
+            <form class="admin-login__form"
+                  method="POST"
+                  action="{{ route('admin.login') }}"
+                  novalidate>
                 @csrf
 
                 {{-- メールアドレス --}}
@@ -20,12 +24,11 @@
                     <label for="email" class="admin-login__label">メールアドレス</label>
                     <input
                         id="email"
-                        type="email"
+                        type="text"
                         name="email"
                         value="{{ old('email') }}"
                         class="admin-login__input"
                         autocomplete="email"
-                        required
                         autofocus
                     >
                     @error('email')
@@ -42,23 +45,13 @@
                         name="password"
                         class="admin-login__input"
                         autocomplete="current-password"
-                        required
                     >
                     @error('password')
                         <p class="admin-login__error">{{ $message }}</p>
                     @enderror
                 </div>
 
-                {{-- 共通のバリデーションエラー（メール／パスワード以外） --}}
-                @if ($errors->has('email') === false && $errors->has('password') === false && $errors->any())
-                    <div class="admin-login__error-block" role="alert">
-                        <ul>
-                            @foreach ($errors->all() as $error)
-                                <li>{{ $error }}</li>
-                            @endforeach
-                        </ul>
-                    </div>
-                @endif
+                {{-- ★ 必要のない共通エラー枠は削除済み！ --}}
 
                 {{-- ボタン --}}
                 <div class="admin-login__actions">

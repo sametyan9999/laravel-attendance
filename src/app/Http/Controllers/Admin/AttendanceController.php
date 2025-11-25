@@ -238,29 +238,58 @@ class AttendanceController extends Controller
 
     public function update(AttendanceUpdateRequest $request, Attendance $attendance)
     {
-        $data = $request->validated();
+        // 画面の入力値（clock_in / clock_out / break1_*, break2_*）を取得
+        $ci     = $request->input('clock_in', $request->input('clock_in_at'));
+        $co     = $request->input('clock_out', $request->input('clock_out_at'));
+        $b1_in  = $request->input('break1_in');
+        $b1_out = $request->input('break1_out');
+        $b2_in  = $request->input('break2_in');
+        $b2_out = $request->input('break2_out');
 
-        DB::transaction(function () use ($attendance, $data) {
+        DB::transaction(function () use ($attendance, $request, $ci, $co, $b1_in, $b1_out, $b2_in, $b2_out) {
+            // 勤怠本体を更新
             $attendance->fill([
-                'clock_in_at'  => $data['clock_in_at']  ?? null,
-                'clock_out_at' => $data['clock_out_at'] ?? null,
-                'note'         => $data['note']         ?? null,
-                'status'       => $data['status'],
+                'clock_in_at'  => $ci ?: null,
+                'clock_out_at' => $co ?: null,
+                'note'         => $request->input('note'),
+                'status'       => $request->input('status'),
             ])->save();
 
+            // 既存の休憩を一旦削除
             $attendance->breaks()->delete();
 
-            foreach ($data['breaks'] ?? [] as $b) {
-                if (!empty($b['break_in_at']) || !empty($b['break_out_at'])) {
-                    AttendanceBreak::create([
-                        'attendance_id' => $attendance->id,
-                        'break_in_at'   => $b['break_in_at'] ?? null,
-                        'break_out_at'  => $b['break_out_at'] ?? null,
-                    ]);
-                }
+            // 休憩データを再作成（1つ目 / 2つ目）
+            $breaksToCreate = [];
+
+            if (!empty($b1_in) || !empty($b1_out)) {
+                $breaksToCreate[] = [
+                    'break_in_at'  => $b1_in ?: null,
+                    'break_out_at' => $b1_out ?: null,
+                ];
+            }
+
+            if (!empty($b2_in) || !empty($b2_out)) {
+                $breaksToCreate[] = [
+                    'break_in_at'  => $b2_in ?: null,
+                    'break_out_at' => $b2_out ?: null,
+                ];
+            }
+
+            foreach ($breaksToCreate as $b) {
+                AttendanceBreak::create([
+                    'attendance_id' => $attendance->id,
+                    'break_in_at'   => $b['break_in_at'],
+                    'break_out_at'  => $b['break_out_at'],
+                ]);
             }
         });
 
-        return back()->with('ok', true);
+        // 修正後：個人の1ヶ月勤怠一覧へリダイレクト
+        return redirect()
+            ->route('admin.attendance.by_user', [
+                'user'  => $attendance->user_id,
+                'month' => Carbon::parse($attendance->work_date)->format('Y-m'),
+            ])
+            ->with('ok', true);
     }
 }

@@ -167,12 +167,12 @@ docker compose exec php php artisan db:seed --class=AttendanceBreaksTableSeeder
 # 修正申請データも確認したい場合
 docker compose exec php php artisan db:seed --class=StampCorrectionRequestsTableSeeder
 ```
-※ `php artisan migrate:fresh --seed` を実行した場合は
+`php artisan migrate:fresh --seed` を実行した場合は
 DatabaseSeeder に記載されている Seeder（AdminUserSeeder / UsersTableSeeder / AttendancesTableSeeder / AttendanceBreaksTableSeeder / StampCorrectionRequestsTableSeeder）
 が自動ですべて実行されます。
 
 手動実行コマンドは、必要に応じてデータを追加・再投入したい場合に使用できます。
-※Seeder で投入している承認済みの修正申請データは、
+Seeder で投入している承認済みの修正申請データは、
 画面レイアウト確認用のダミーデータです。
 勤怠テーブルの出勤・退勤時刻までは自動反映していません。
 
